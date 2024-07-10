@@ -1,11 +1,12 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
-from .serializers import IndividualUserCreationSerializer, BusinessUserCreationSerializer, IndividualUserLoginSerializer, BusinessUserLoginSerializer
+from .serializers import IndividualUserCreationSerializer, BusinessUserCreationSerializer, IndividualUserLoginSerializer, BusinessUserLoginSerializer, UserDeleteSerializer
 
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.parsers import MultiPartParser, FormParser
 from .serializers import UserProfileSerializer
+from .serializers import BusinessUserProfileSerializer 
 
 
 class IndividualRegisterView(generics.GenericAPIView):
@@ -81,35 +82,29 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
 
+class BusinessUserProfileView(generics.RetrieveUpdateAPIView):
+    queryset = CustomUser.objects.filter(user_type='business')
+    serializer_class = BusinessUserProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser,)
 
-# class IndividualLoginView(generics.GenericAPIView):
-#     serializer_class = IndividualUserLoginSerializer
-
-#     def post(self, request, *args, **kwargs):
-#         serializer = self.get_serializer(data=request.data)
-#         try:
-#             serializer.is_valid(raise_exception=True)
-#         except Exception as e:
-#             print("Validation Error:", str(e))
-#             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-#         user = serializer.validated_data['user']
-#         tokens = serializer.get_tokens_for_user(user)
-#         return Response(tokens, status=status.HTTP_200_OK)
-
-# class BusinessLoginView(generics.GenericAPIView):
-#     serializer_class = BusinessUserLoginSerializer
-
-#     def post(self, request, *args, **kwargs):
-#         serializer = self.get_serializer(data=request.data)
-#         try:
-#             serializer.is_valid(raise_exception=True)
-#         except Exception as e:
-#             print("Validation Error:", str(e))
-#             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-#         user = serializer.validated_data['user']
-#         tokens = serializer.get_tokens_for_user(user)
-#         return Response(tokens, status=status.HTTP_200_OK)
+    def get_object(self):
+        return self.request.user
 
 
+class UserDeleteView(generics.GenericAPIView):
+    serializer_class = UserDeleteSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = request.user
+        reason = serializer.validated_data.get('reason', '')
+        # 여기서 필요하다면 탈퇴 이유를 로그로 남기거나 별도 처리할 수 있습니다.
+        print(f"User {user.username} is being deleted for reason: {reason}")
+
+        user.delete()
+
+        return Response({"detail": "사용자가 성공적으로 삭제되었습니다."}, status=status.HTTP_204_NO_CONTENT)
