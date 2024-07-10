@@ -1,10 +1,12 @@
 from django.urls import path
-from .views import IndividualRegisterView, BusinessRegisterView,IndividualLoginView, BusinessLoginView, UserProfileView
+from .views import BusinessUserProfileView, IndividualRegisterView, BusinessRegisterView,IndividualLoginView, BusinessLoginView, UserDeleteView, UserProfileView
 
 urlpatterns = [
-    path('register/individual/', IndividualRegisterView.as_view(), name='individual-register'),
-    path('register/business/', BusinessRegisterView.as_view(), name='business-register'),
-    path('login/individual/', IndividualLoginView.as_view(), name='individual-login'),
-    path('login/business/', BusinessLoginView.as_view(), name='business-login'),
+    path('register/', IndividualRegisterView.as_view(), name='individual-register'),
+    path('register/b/', BusinessRegisterView.as_view(), name='business-register'),
+    path('login/', IndividualLoginView.as_view(), name='individual-login'),
+    path('login/b/', BusinessLoginView.as_view(), name='business-login'),
     path('profile/', UserProfileView.as_view(), name='user-profile'),
+    path('profile/b', BusinessUserProfileView.as_view(), name='business-user-profile'),
+    path('del/', UserDeleteView.as_view(), name='user-delete'),
 ]

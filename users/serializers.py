@@ -149,3 +149,22 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'user_type': {'read_only': True}
         }
 
+class BusinessUserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'nickname', 'phone', 'company_name', 'address', 'detail_address', 'profile_picture']
+        extra_kwargs = {
+            'username': {'read_only': True},
+            'phone': {'required': False, 'allow_blank': True},
+            'profile_picture': {'required': False, 'allow_null': True}
+        }
+        
+        
+class UserDeleteSerializer(serializers.Serializer):
+    agree_terms = serializers.BooleanField(write_only=True)
+    reason = serializers.CharField(write_only=True, required=False, allow_blank=True)
+
+    def validate_agree_terms(self, value):
+        if not value:
+            raise serializers.ValidationError("탈퇴 동의는 필수입니다.")
+        return value
