@@ -2,6 +2,8 @@ from rest_framework import serializers
 from django.contrib.auth import authenticate, password_validation
 from .models import CustomUser
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework import serializers
+from .models import CustomUser
 
 class IndividualUserCreationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[password_validation.validate_password])
@@ -136,3 +138,14 @@ class BusinessUserLoginSerializer(serializers.Serializer):
             'refresh': str(refresh),
             'access': str(refresh.access_token),
         }
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'nickname', 'phone', 'address', 'detail_address', 'profile_picture', 'user_type']
+        extra_kwargs = {
+            'username': {'read_only': True},
+            'user_type': {'read_only': True}
+        }
+
