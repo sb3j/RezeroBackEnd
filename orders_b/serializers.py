@@ -1,20 +1,54 @@
 from rest_framework import serializers
-from .models import Order
+from .models import ReceiveOrder
 
-class OrderSerializer(serializers.ModelSerializer):
-    original_category = serializers.ChoiceField(choices=Order.ORIGINAL_CATEGORY_CHOICES)
-    desired_category = serializers.ChoiceField(choices=Order.DESIRED_CATEGORY_CHOICES)
+class ReceiveOrderRequestListSerializer(serializers.ModelSerializer):
+    customer_nickname = serializers.CharField(source='customer.username', read_only=True)
 
     class Meta:
-        model = Order
+        model = ReceiveOrder
         fields = [
             'id', 
-            'order_number',
             'customer_nickname',
             'customer_order_number',
-            'original_category',
-            'desired_category',
+            'clothing_category',
             'order_date',
-            'due_date',
-            'status'
+            'order_title',
+        ]
+
+
+class ReceiveOrderListSerializer(serializers.ModelSerializer):
+    customer_nickname = serializers.CharField(source='customer.username', read_only=True)
+
+    class Meta:
+        model = ReceiveOrder
+        fields = [
+            'id',  
+            'customer_nickname',
+            'customer_order_number',
+            'clothing_category',
+            'order_date',
+            'order_title',
+        ]
+
+class ReceiveOrderSerializer(serializers.ModelSerializer):
+    customer_nickname = serializers.CharField(source='customer.username', read_only=True)
+    business_user_nickname = serializers.CharField(source='business_user.username', read_only=True)
+
+    class Meta:
+        model = ReceiveOrder
+        fields = [
+            'id',
+            'order_number',
+            'order_date',
+            'customer_nickname',
+            'customer_email',
+            'customer_address',
+            'order_title',
+            'order_content',
+            'preference_collar',
+            'preference_pocket',
+            'image_before',
+            'image_after',
+            'status',
+            'business_user_nickname',
         ]
