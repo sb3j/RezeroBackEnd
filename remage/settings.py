@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'faq',
     'orders_b',
+    'django_filters',
     
 ]
 
