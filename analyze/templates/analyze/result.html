@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analysis Result</title>
+</head>
+<body>
+    <h2>Analysis Result</h2>
+    <img src="{{ image.image.url }}" alt="Uploaded Image">
+    <p>Category: {{ result.category }}</p>
+    <p>Material: {{ result.material }}</p>
+    <p>Color: {{ result.color }}</p>
+    <a href="{% url 'upload_image' %}">Upload another image</a>
+</body>
+</html>
