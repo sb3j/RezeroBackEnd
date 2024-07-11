@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Order</title>
+</head>
+<body>
+    <h1>Create Your Order</h1>
+    <!-- 주문서 작성 폼 구현 -->
+    <form method="post" action="{% url 'submit_order' %}">
+        {% csrf_token %}
+        <!-- 주문서 작성 폼 필드들 -->
+        <button type="submit">Submit Order</button>
+    </form>
+</body>
+</html>
