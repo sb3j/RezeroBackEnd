@@ -3,3 +3,5 @@ venv/
 *.log
 *.pyc
 .env
+*.pyc
+remage/__pycache__/
