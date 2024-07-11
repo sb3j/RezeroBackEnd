@@ -1,1 +1,5 @@
 settings.py
+venv/
+*.log
+*.pyc
+.env
