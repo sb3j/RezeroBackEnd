@@ -2,13 +2,69 @@
 <html>
 <head>
     <title>Upload Image</title>
+    <script>
+        function updateForm() {
+            var category = "{{ result.category }}";
+            var neckLineField = document.getElementById("id_neck_line").parentElement;
+            var sleeveLengthField = document.getElementById("id_sleeve_length").parentElement;
+            var patternField = document.getElementById("id_pattern").parentElement;
+            var pocketField = document.getElementById("id_pocket").parentElement;
+            var zipField = document.getElementById("id_zip").parentElement;
+            var buttonField = document.getElementById("id_button").parentElement;
+            var bShapeField = document.getElementById("id_b_shape").parentElement;
+            var bColorField = document.getElementById("id_b_color").parentElement;
+            var addtDesignField = document.getElementById("id_addt_design").parentElement;
+
+            // Hide all fields initially
+            patternField.style.display = "none";
+            pocketField.style.display = "none";
+            zipField.style.display = "none";
+            buttonField.style.display = "none";
+            bShapeField.style.display = "none";
+            bColorField.style.display = "none";
+
+            // Show fields based on category
+            if (category == "sweater") {
+                patternField.style.display = "block";
+                zipField.style.display = "block";
+                buttonField.style.display = "block";
+                bShapeField.style.display = "block";
+                bColorField.style.display = "block";
+            } else {
+                pocketField.style.display = "block";
+            }
+        }
+        window.onload = updateForm;
+    </script>
 </head>
 <body>
-    <h2>Upload Image</h2>
+    {% if not result %}
+    <h1>Upload Image</h1>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Upload</button>
+        <button type="submit" name="upload">Upload</button>
     </form>
+    {% endif %}
+
+    {% if result %}
+    <h1>Analysis Result</h1>
+    <img src="{{ image_url }}" alt="Uploaded Image">
+    <p>Category: {{ result.category }}</p>
+    <p>Material: {{ result.material }}</p>
+    <p>Color: {{ result.color }}</p>
+
+    <h2>Upload Another Image</h2>
+    <form method="get" action="{% url 'upload_image' %}">
+        <button type="submit">Upload Another Image</button>
+    </form>
+
+    <h2>Design Your Clothing</h2>
+    <form method="post" action="{% url 'upload_image' %}">
+        {% csrf_token %}
+        {{ design_form.as_p }}
+        <button type="submit" name="design">Generate Image</button>
+    </form>    
+    {% endif %}
 </body>
 </html>
