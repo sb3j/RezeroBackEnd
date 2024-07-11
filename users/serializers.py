@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, password_validation
 from .models import CustomUser
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import serializers
-from .models import CustomUser
+from django.contrib.auth.password_validation import validate_password
 
 class IndividualUserCreationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[password_validation.validate_password])
@@ -141,18 +141,32 @@ class BusinessUserLoginSerializer(serializers.Serializer):
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
+    orders_count = serializers.IntegerField(source='orders.count', read_only=True)
+    bookmarks_count = serializers.IntegerField(source='bookmarks.count', read_only=True)
+    saved_designs = serializers.SerializerMethodField()
+
     class Meta:
         model = CustomUser
-        fields = ['username', 'nickname', 'phone', 'address', 'detail_address', 'profile_picture', 'user_type']
+        fields = ['username', 'nickname', 'phone', 'address', 'detail_address', 'profile_picture', 'user_type', 'orders_count', 'bookmarks_count', 'saved_designs']
         extra_kwargs = {
             'username': {'read_only': True},
-            'user_type': {'read_only': True}
+            'user_type': {'read_only': True},
+            'phone': {'required': False, 'allow_blank': True},
+            'profile_picture': {'required': False, 'allow_null': True}
         }
 
+    def get_saved_designs(self, obj):
+        saved_designs_qs = obj.saved_designs.all()[:3]  
+        serialized_designs = SavedDesignSerializer(saved_designs_qs, many=True).data
+        return serialized_designs
+    
+    
 class BusinessUserProfileSerializer(serializers.ModelSerializer):
+    order_requests_count = serializers.IntegerField(source='order_requests.count', read_only=True)
+
     class Meta:
         model = CustomUser
-        fields = ['username', 'nickname', 'phone', 'company_name', 'address', 'detail_address', 'profile_picture']
+        fields = ['username', 'nickname', 'phone', 'company_name', 'address', 'detail_address', 'profile_picture', 'order_requests_count']
         extra_kwargs = {
             'username': {'read_only': True},
             'phone': {'required': False, 'allow_blank': True},
@@ -168,3 +182,20 @@ class UserDeleteSerializer(serializers.Serializer):
         if not value:
             raise serializers.ValidationError("탈퇴 동의는 필수입니다.")
         return value
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True, validators=[validate_password])
+    verify_password = serializers.CharField(required=True)
+
+    def validate_old_password(self, value):
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("현재 비밀번호가 일치하지 않습니다.")
+        return value
+
+    def validate(self, data):
+        if data['new_password'] != data['verify_password']:
+            raise serializers.ValidationError("새로운 비밀번호가 일치하지 않습니다.")
+        password_validation.validate_password(data['new_password'])
+        return data
