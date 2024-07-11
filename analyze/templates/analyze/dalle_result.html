@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DALL-E Result</title>
+</head>
+<body>
+    <h1>Generated Image</h1>
+    <img src="{{ image_url }}" alt="Generated Image">
+
+    <form method="post" action="{% url 'dalle_result' %}">
+        {% csrf_token %}
+        <button type="submit" name="regenerate">Regenerate Image</button>
+    </form>
+
+    <form method="get" action="{% url 'create_order' %}">
+        <button type="submit">Create Order</button>
+    </form>
+</body>
+</html>
