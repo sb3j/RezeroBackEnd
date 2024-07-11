@@ -157,7 +157,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     def get_saved_designs(self, obj):
         saved_designs_qs = obj.saved_designs.all()[:3]  
-        serialized_designs = SavedDesignSerializer(saved_designs_qs, many=True).data
+        serialized_designs = SavedDesignSerializer(saved_designs_qs, many=True).data # type: ignore
         return serialized_designs
     
     
