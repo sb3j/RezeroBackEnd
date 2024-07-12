@@ -39,8 +39,6 @@ def upload_image(request):
                 design_form.fields['pattern'].required = True
                 design_form.fields['zip'].required = True
                 design_form.fields['button'].required = True
-                design_form.fields['b_shape'].required = True
-                design_form.fields['b_color'].required = True
             else:
                 design_form.fields['pocket'].required = True
 
@@ -96,8 +94,6 @@ def make_prompt(result, design_data):
     pocket = design_data.get('pocket', '')
     zip = design_data.get('zip', '')
     button = design_data.get('button', '')
-    b_shape = design_data.get('b_shape', 'round')
-    b_color = design_data.get('b_color', cloth_color)
     addt_design = design_data.get('addt_design', '').split()   
 
 
