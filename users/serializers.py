@@ -106,6 +106,53 @@ class IndividualUserLoginSerializer(serializers.Serializer):
             'refresh': str(refresh),
             'access': str(refresh.access_token),
         }
+        
+class UserProfileSerializer(serializers.ModelSerializer):
+    orders_count = serializers.IntegerField(source='orders.count', read_only=True)
+    bookmarks_count = serializers.IntegerField(source='bookmarks.count', read_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'nickname', 'phone', 'address', 'detail_address', 'profile_picture', 'user_type', 'orders_count', 'bookmarks_count']
+        extra_kwargs = {
+            'username': {'read_only': True},
+            'user_type': {'read_only': True},
+            'phone': {'required': False, 'allow_blank': True},
+            'profile_picture': {'required': False, 'allow_null': True}
+        }      
+
+# class UserProfileSerializer(serializers.ModelSerializer):
+#     orders_count = serializers.IntegerField(source='orders.count', read_only=True)
+#     bookmarks_count = serializers.IntegerField(source='bookmarks.count', read_only=True)
+#     saved_designs = serializers.SerializerMethodField()
+
+#     class Meta:
+#         model = CustomUser
+#         fields = ['username', 'nickname', 'phone', 'address', 'detail_address', 'profile_picture', 'user_type', 'orders_count', 'bookmarks_count', 'saved_designs']
+#         extra_kwargs = {
+#             'username': {'read_only': False},
+#             'user_type': {'read_only': True},
+#             'phone': {'required': False, 'allow_blank': True},
+#             'profile_picture': {'required': False, 'allow_null': True}
+#         }
+
+#     def get_saved_designs(self, obj):
+#         saved_designs_qs = obj.saved_designs.all()[:3]
+#         serialized_designs = SavedDesignSerializer(saved_designs_qs, many=True).data # type: ignore
+#         return serialized_designs
+
+
+class BusinessUserProfileSerializer(serializers.ModelSerializer):
+    order_requests_count = serializers.IntegerField(source='order_requests.count', read_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'nickname', 'phone', 'company_name', 'address', 'detail_address', 'profile_picture', 'order_requests_count']
+        extra_kwargs = {
+            'username': {'read_only': False},
+            'phone': {'required': False, 'allow_blank': True},
+            'profile_picture': {'required': False, 'allow_null': True}
+        }
 
 class BusinessUserLoginSerializer(serializers.Serializer):
     username = serializers.CharField()
@@ -140,40 +187,9 @@ class BusinessUserLoginSerializer(serializers.Serializer):
         }
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
-    orders_count = serializers.IntegerField(source='orders.count', read_only=True)
-    bookmarks_count = serializers.IntegerField(source='bookmarks.count', read_only=True)
-    saved_designs = serializers.SerializerMethodField()
 
-    class Meta:
-        model = CustomUser
-        fields = ['username', 'nickname', 'phone', 'address', 'detail_address', 'profile_picture', 'user_type', 'orders_count', 'bookmarks_count', 'saved_designs']
-        extra_kwargs = {
-            'username': {'read_only': True},
-            'user_type': {'read_only': True},
-            'phone': {'required': False, 'allow_blank': True},
-            'profile_picture': {'required': False, 'allow_null': True}
-        }
 
-    def get_saved_designs(self, obj):
-        saved_designs_qs = obj.saved_designs.all()[:3]  
-        serialized_designs = SavedDesignSerializer(saved_designs_qs, many=True).data # type: ignore
-        return serialized_designs
     
-    
-class BusinessUserProfileSerializer(serializers.ModelSerializer):
-    order_requests_count = serializers.IntegerField(source='order_requests.count', read_only=True)
-
-    class Meta:
-        model = CustomUser
-        fields = ['username', 'nickname', 'phone', 'company_name', 'address', 'detail_address', 'profile_picture', 'order_requests_count']
-        extra_kwargs = {
-            'username': {'read_only': True},
-            'phone': {'required': False, 'allow_blank': True},
-            'profile_picture': {'required': False, 'allow_null': True}
-        }
-        
-        
 class UserDeleteSerializer(serializers.Serializer):
     agree_terms = serializers.BooleanField(write_only=True)
     reason = serializers.CharField(write_only=True, required=False, allow_blank=True)

@@ -85,6 +85,23 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
 
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        response_data = {
+            "변경 아이디": serializer.validated_data.get('username', instance.username),
+            "변경 닉네임": serializer.validated_data.get('nickname', instance.nickname),
+            "변경 전화번호": serializer.validated_data.get('phone', instance.phone),
+            "변경 주소": serializer.validated_data.get('address', instance.address),
+            "변경 상세주소": serializer.validated_data.get('detail_address', instance.detail_address),
+            "프로필 사진": request.build_absolute_uri(instance.profile_picture.url) if instance.profile_picture else None
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)
 
 class BusinessUserProfileView(generics.RetrieveUpdateAPIView):
     queryset = CustomUser.objects.filter(user_type='business')
@@ -94,6 +111,25 @@ class BusinessUserProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        response_data = {
+            "변경 아이디": serializer.validated_data.get('username', instance.username),
+            "변경 닉네임": serializer.validated_data.get('nickname', instance.nickname),
+            "변경 전화번호": serializer.validated_data.get('phone', instance.phone),
+            "변경 주소": serializer.validated_data.get('address', instance.address),
+            "변경 상세주소": serializer.validated_data.get('detail_address', instance.detail_address),
+            "변경 프로필이미지": request.build_absolute_uri(instance.profile_picture.url) if instance.profile_picture else None
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)
+
 
 
 class UserDeleteView(generics.GenericAPIView):
@@ -106,12 +142,11 @@ class UserDeleteView(generics.GenericAPIView):
 
         user = request.user
         reason = serializer.validated_data.get('reason', '')
-        # 여기서 필요하다면 탈퇴 이유를 로그로 남기거나 별도 처리할 수 있습니다.
         print(f"User {user.username} is being deleted for reason: {reason}")
 
         user.delete()
 
-        return Response({"detail": "사용자가 성공적으로 삭제되었습니다."}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "사용자가 성공적으로 삭제되었습니다."}, status=status.HTTP_204_NO_CONTENT)
     
     
     
@@ -129,5 +164,5 @@ class ChangePasswordView(generics.UpdateAPIView):
             user = self.get_object()
             user.set_password(serializer.validated_data['new_password'])
             user.save()
-            return Response({"detail": "비밀번호가 성공적으로 변경되었습니다."}, status=status.HTTP_200_OK)
+            return Response({"message": "비밀번호가 성공적으로 변경되었습니다."}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
