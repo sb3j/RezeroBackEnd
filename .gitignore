@@ -5,3 +5,4 @@ venv/
 .env
 *.pyc
 remage/__pycache__/
+.venv
