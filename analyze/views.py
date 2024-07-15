@@ -206,3 +206,7 @@ def make_prompt(result, design_data):
     print("전체 프롬프트: ", full_prompt)
 
     return full_prompt
+
+def create_order(request):
+    # 주문서 작성 로직 구현
+    return render(request, 'analyze/create_order.html') 
