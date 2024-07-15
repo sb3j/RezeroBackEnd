@@ -47,12 +47,14 @@ python manage.py migrate
 
 ### 웹서버 & fastapi 실행
 ```bash
+# cmd 창 각각 사용하기
 python manage.py runserver
 uvicorn fastapi_app.main:app --reload --port 8001
-# cmd 창 각각 사용하기
+# 웹서버 실행 확인: http://127.0.0.1:8000/
+# fastapi 실행 확인: http://127.0.0.1:8001/docs
 ```
-웹서버 실행 확인: http://127.0.0.1:8000/
-fastapi 실행 확인: http://127.0.0.1:8001/docs
+
+
 
 
 
