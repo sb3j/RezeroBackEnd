@@ -45,12 +45,6 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-### 프로젝트 설정
-```bash
-python manage.py makemigrations
-python manage.py migrate
-```
-
 ### 웹서버 & fastapi 실행
 ```bash
 python manage.py runserver
