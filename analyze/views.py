@@ -88,7 +88,7 @@ def dalle_result(request):
 def make_prompt(result, design_data):
     material = result['material']
     category = result['category']
-    cloth_color = result['color']
+    color = result['color']
     
     neck_line = design_data['neck_line']
     sleeve_length = design_data['sleeve_length']
@@ -100,10 +100,10 @@ def make_prompt(result, design_data):
 
 
      # 프롬프트
-    shirts_common_prompt = f"There's a {material} {category}. The color of this {category} is {cloth_color}. This {neck_line} {category} is {sleeve_length}."
+    shirts_common_prompt = f"There's a {material} {category}. The color of this {category} is {color}. This {neck_line} {category} is {sleeve_length}."
     pocket_prompt = f"This {category} has a pocket on its {pocket} chest. "
 
-    sweater_neck_common_prompt = f"There's a {material} {category}. The color of this {category} is {cloth_color}. This {neck_line} {category} is {pattern} pattern and {sleeve_length}. "
+    sweater_neck_common_prompt = f"There's a {material} {category}. The color of this {category} is {color}. This {neck_line} {category} is {pattern} pattern and {sleeve_length}. "
     zip_prompt = f"Also, the {category} is a {zip}."
 
     if button:
