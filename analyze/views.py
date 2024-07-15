@@ -88,7 +88,7 @@ def dalle_result(request):
 def make_prompt(result, design_data):
     material = result['material']
     category = result['category']
-    cloth_color = result['color']
+    color = result['color']
     
     neck_line = design_data['neck_line']
     sleeve_length = design_data['sleeve_length']
@@ -96,16 +96,14 @@ def make_prompt(result, design_data):
     pocket = design_data.get('pocket', '')
     zip = design_data.get('zip', '')
     button = design_data.get('button', '')
-    b_shape = design_data.get('b_shape', 'round')
-    b_color = design_data.get('b_color', cloth_color)
     addt_design = design_data.get('addt_design', '').split()   
 
 
      # 프롬프트
-    shirts_common_prompt = f"There's a {material} {category}. The color of this {category} is {cloth_color}. "
+    shirts_common_prompt = f"There's a {material} {category}. The color of this {category} is {color}. This {neck_line} {category} is {sleeve_length}."
     pocket_prompt = f"This {category} has a pocket on its {pocket} chest. "
 
-    sweater_neck_common_prompt = f"There's a {material} {category}. The color of this {category} is {cloth_color}. This {neck_line} {category} is {pattern} pattern and {sleeve_length}. "
+    sweater_neck_common_prompt = f"There's a {material} {category}. The color of this {category} is {color}. This {neck_line} {category} is {pattern} pattern and {sleeve_length}. "
     zip_prompt = f"Also, the {category} is a {zip}."
 
     if button:
@@ -209,7 +207,6 @@ def make_prompt(result, design_data):
 
     return full_prompt
 
-
 def create_order(request):
     # 주문서 작성 로직 구현
-    return render(request, 'analyze/create_order.html')
+    return render(request, 'analyze/create_order.html') 

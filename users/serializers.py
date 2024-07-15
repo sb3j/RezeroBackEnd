@@ -4,7 +4,6 @@ from .models import CustomUser
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
-from orders_b.models import Company 
 
 
 class IndividualUserCreationSerializer(serializers.ModelSerializer):
@@ -40,12 +39,6 @@ class IndividualUserCreationSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
-    
-
-from rest_framework import serializers
-from django.contrib.auth.password_validation import validate_password
-from users.models import CustomUser
-from orders_b.models import Company
 
 
 class BusinessUserCreationSerializer(serializers.ModelSerializer):
@@ -83,15 +76,15 @@ class BusinessUserCreationSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
 
-        # Company 모델에 데이터 저장
-        company = Company.objects.create(
-            name=validated_data['company_name'],
-            owner=user,
-            business_registration_number=validated_data['business_registration_number'],
-            phone=validated_data['phone'],
-            address=validated_data['address'],
-            detail_address=validated_data['detail_address']
-        )
+        # Company 모델에 데이터 저장 부분 제거
+        # company = Company.objects.create(
+        #     name=validated_data['company_name'],
+        #     owner=user,
+        #     business_registration_number=validated_data['business_registration_number'],
+        #     phone=validated_data['phone'],
+        #     address=validated_data['address'],
+        #     detail_address=validated_data['detail_address']
+        # )
 
         return user
 
@@ -142,30 +135,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'profile_picture': {'required': False, 'allow_null': True}
         }      
 
-# class UserProfileSerializer(serializers.ModelSerializer):
-#     orders_count = serializers.IntegerField(source='orders.count', read_only=True)
-#     bookmarks_count = serializers.IntegerField(source='bookmarks.count', read_only=True)
-#     saved_designs = serializers.SerializerMethodField()
-
-#     class Meta:
-#         model = CustomUser
-#         fields = ['username', 'nickname', 'phone', 'address', 'detail_address', 'profile_picture', 'user_type', 'orders_count', 'bookmarks_count', 'saved_designs']
-#         extra_kwargs = {
-#             'username': {'read_only': False},
-#             'user_type': {'read_only': True},
-#             'phone': {'required': False, 'allow_blank': True},
-#             'profile_picture': {'required': False, 'allow_null': True}
-#         }
-
-#     def get_saved_designs(self, obj):
-#         saved_designs_qs = obj.saved_designs.all()[:3]
-#         serialized_designs = SavedDesignSerializer(saved_designs_qs, many=True).data # type: ignore
-#         return serialized_designs
-
-
-from rest_framework import serializers
-from users.models import CustomUser
-from orders_b.models import Company
 
 class BusinessUserProfileSerializer(serializers.ModelSerializer):
     order_requests_count = serializers.IntegerField(source='order_requests.count', read_only=True)
@@ -192,11 +161,11 @@ class BusinessUserProfileSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
 
-        # Company 모델에 데이터 업데이트
-        company, created = Company.objects.get_or_create(owner=instance)
-        for attr, value in company_data.items():
-            setattr(company, attr, value)
-        company.save()
+        # Company 모델에 데이터 업데이트 부분 제거
+        # company, created = Company.objects.get_or_create(owner=instance)
+        # for attr, value in company_data.items():
+        #     setattr(company, attr, value)
+        # company.save()
 
         return instance
 
