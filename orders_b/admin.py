@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import CustomUser, ReceiveOrder
+from .models import Company
 
-admin.site.register(CustomUser)
-admin.site.register(ReceiveOrder)
+class CompanyAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'created_at', 'business_registration_number', 'phone', 'address', 'detail_address')
+
+admin.site.register(Company, CompanyAdmin)

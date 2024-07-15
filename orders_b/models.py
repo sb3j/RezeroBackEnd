@@ -1,41 +1,27 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 
-class CustomUser(AbstractUser):
-    USER_TYPE_CHOICES = (
-        ('individual', 'Individual'),
-        ('business', 'Business'),
-        ('admin', 'Admin')
-    )
-    user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES)
-
-class ReceiveOrder(models.Model):
-    ORDER_STATUS_CHOICES = [
-        ('accepted', '수락'),
-        ('rejected', '거절'),
-    ]
-
-    CLOTHING_CATEGORY_CHOICES = [
-        ('shirt', '셔츠'),
-        ('tshirt', '티셔츠'),
-        ('sweater', '스웨터'),
-    ]
-
-    order_number = models.CharField(max_length=100)
-    customer_order_number = models.CharField(max_length=6)  # 6자리 알파벳+숫자 조합
-    clothing_category = models.CharField(max_length=100, choices=CLOTHING_CATEGORY_CHOICES)  # 의류 카테고리 추가
-    order_date = models.DateTimeField(auto_now_add=True)
-    customer = models.ForeignKey(CustomUser, related_name='orders', on_delete=models.CASCADE)
-    customer_email = models.EmailField()
-    customer_address = models.CharField(max_length=255)
-    order_title = models.CharField(max_length=255)
-    order_content = models.TextField()
-    preference_collar = models.BooleanField(default=False)
-    preference_pocket = models.BooleanField(default=False)
-    image_before = models.ImageField(upload_to='orders/before/')
-    image_after = models.ImageField(upload_to='orders/after/', null=True, blank=True)
-    status = models.CharField(max_length=10, choices=ORDER_STATUS_CHOICES)
-    business_user = models.ForeignKey(CustomUser, related_name='received_orders', on_delete=models.CASCADE, limit_choices_to={'user_type': 'business'})
+class Company(models.Model):
+    name = models.CharField(max_length=255)
+    owner = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='company')
+    business_registration_number = models.CharField(max_length=20, blank=True, null=True)
+    phone = models.CharField(max_length=15, blank=True, null=True)
+    address = models.CharField(max_length=255, default='', blank=True, null=True)
+    detail_address = models.CharField(max_length=255, default='', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.order_title
+        return self.name
+    
+
+class Fix(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    company = models.ForeignKey('Company', on_delete=models.CASCADE)
+    category = models.CharField(max_length=10)
+    sleeve_length = models.CharField(max_length=15)
+    neckline = models.CharField(max_length=20)
+    pocket = models.CharField(max_length=10, blank=True, null=True)
+    etc = models.CharField(max_length=10)
+    material = models.CharField(max_length=20)  # 추가된 필드
+    color = models.CharField(max_length=20)  # 추가된 필드
+    created_at = models.DateTimeField(auto_now_add=True)

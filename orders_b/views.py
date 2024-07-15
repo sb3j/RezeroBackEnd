@@ -1,53 +1,90 @@
-from rest_framework import generics, status
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
-from .models import ReceiveOrder
-from .serializers import ReceiveOrderRequestListSerializer, ReceiveOrderSerializer, ReceiveOrderListSerializer
-from .pagination import StandardResultsSetPagination
-from .filters import ReceiveOrderFilter
+from rest_framework import generics, permissions, filters, status
+from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import OrderingFilter
-
-
-# 모든 주문 요청 목록 조회, 디폴트가 최신순
-class OrderRequestListView(generics.ListAPIView):
-    queryset = ReceiveOrder.objects.all()
-    serializer_class = ReceiveOrderRequestListSerializer
-    permission_classes = [AllowAny]
-    pagination_class = StandardResultsSetPagination
-    filter_backends = [DjangoFilterBackend, OrderingFilter]
-    filterset_class = ReceiveOrderFilter
-    ordering_fields = ['order_date']
-    ordering = ['-order_date']  
+from rest_framework.response import Response
+from orders_b.models import Fix
+from orders_u.models import OrderUser  
+from orders_b.serializers import OrderUserListSerializer, FixSerializer
+from orders_b.permissions import IsCompanyUser
 
 
 
- # 특정 주문 요청의 상세 조회 (customer_order_number필요)
-class OrderDetailView(generics.RetrieveAPIView):
-    queryset = ReceiveOrder.objects.all()
-    serializer_class = ReceiveOrderSerializer
-    permission_classes = [AllowAny]
-    lookup_field = 'customer_order_number'
 
+class OrderUserPagination(PageNumberPagination):
+    page_size = 10
 
-# 주문 수락 (customer_order_number필요)
-class AcceptOrderView(generics.UpdateAPIView):
-    queryset = ReceiveOrder.objects.all()
-    serializer_class = ReceiveOrderSerializer
-    permission_classes = [AllowAny]
+class CompanyOrderListView(generics.ListAPIView):
+    serializer_class = OrderUserListSerializer
+    permission_classes = [permissions.IsAuthenticated, IsCompanyUser]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    ordering_fields = ['created_at']
+    ordering = ['-created_at']
+    pagination_class = OrderUserPagination
 
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.status = 'accepted'
-        instance.save()
-        serializer = self.get_serializer(instance)
+    def get_queryset(self):
+        return OrderUser.objects.filter(company=self.request.user.company)
+
+from rest_framework import generics
+from .models import Company
+from .serializers import CompanySerializer
+class CompanyListView(generics.ListAPIView):
+    queryset = Company.objects.all()
+    serializer_class = CompanySerializer
+    permission_classes = [permissions.IsAuthenticated]  
+    
+    
+
+from rest_framework import generics, permissions
+from orders_u.models import OrderUser
+from .serializers import OrderUserDetailSerializer
+from .permissions import IsCompanyUser
+
+class OrderUserDetailView(generics.RetrieveAPIView):
+    queryset = OrderUser.objects.all()
+    serializer_class = OrderUserDetailSerializer
+    permission_classes = [permissions.IsAuthenticated, IsCompanyUser]
+
+    def get(self, request, *args, **kwargs):
+        order_id = kwargs.get('order_id')
+
+        try:
+            order = OrderUser.objects.get(id=order_id, company=request.user.company)
+        except OrderUser.DoesNotExist:
+            return Response({"error": "Order not found or not authorized."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.get_serializer(order)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 
-# 수락된 주문 목록 조회
-class AcceptedOrderListView(generics.ListAPIView):
-    queryset = ReceiveOrder.objects.filter(status='accepted')
-    serializer_class = ReceiveOrderListSerializer
-    permission_classes = [AllowAny]
-    pagination_class = StandardResultsSetPagination
+class OrderAcceptRejectView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated, IsCompanyUser]
+
+    def post(self, request, *args, **kwargs):
+        order_id = kwargs.get('order_id')
+        action = request.data.get('action')
+
+        try:
+            order = OrderUser.objects.get(id=order_id, company=request.user.company)
+        except OrderUser.DoesNotExist:
+            return Response({"error": "Order not found or not authorized."}, status=status.HTTP_404_NOT_FOUND)
+
+        if action == 'accept':
+            fix = Fix.objects.create(
+                user=order.user,
+                company=order.company,
+                category=order.category,
+                sleeve_length=order.sleeve_length,
+                neckline=order.neckline,
+                pocket=order.pocket,
+                etc=order.etc,
+                material=order.material,  # 추가된 필드
+                color=order.color  # 추가된 필드
+            )
+            order.delete()
+            return Response({"message": "Order accepted and moved to Fix.", "fix": FixSerializer(fix).data}, status=status.HTTP_200_OK)
+        elif action == 'reject':
+            order.delete()
+            return Response({"message": "Order rejected and deleted."}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "Invalid action."}, status=status.HTTP_400_BAD_REQUEST)
