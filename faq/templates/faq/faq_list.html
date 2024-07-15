@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FAQ List</title>
+</head>
+<body>
+    <h1>FAQ 목록</h1>
+    <ul>
+        {% for faq in object_list %}
+            <li><a href="{% url 'faq-detail' faq.id %}">{{ faq.question }}</a></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

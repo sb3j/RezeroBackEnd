@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FAQ Detail</title>
+</head>
+<body>
+    <h1>{{ faq.question }}</h1>
+    <p>{{ faq.answer }}</p>
+
+    <div>
+        {% if previous_faq %}
+            <a href="{% url 'faq-detail' previous_faq.id %}">이전 글: {{ previous_faq.question }}</a>
+        {% endif %}
+    </div>
+    <div>
+        {% if next_faq %}
+            <a href="{% url 'faq-detail' next_faq.id %}">다음 글: {{ next_faq.question }}</a>
+        {% endif %}
+    </div>
+    <div>
+        <a href="{% url 'faq-list' %}">목록으로 돌아가기</a>
+    </div>
+</body>
+</html>
