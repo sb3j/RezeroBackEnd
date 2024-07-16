@@ -12,10 +12,13 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers import ChangePasswordSerializer
 from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny 
+
+
 
 class IndividualRegisterView(generics.GenericAPIView):
     serializer_class = IndividualUserCreationSerializer
-
+    permission_classes = [AllowAny]
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -25,7 +28,7 @@ class IndividualRegisterView(generics.GenericAPIView):
 
 class BusinessRegisterView(generics.GenericAPIView):
     serializer_class = BusinessUserCreationSerializer
-
+    permission_classes = [AllowAny]
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -35,7 +38,7 @@ class BusinessRegisterView(generics.GenericAPIView):
 
 class IndividualLoginView(generics.GenericAPIView):
     serializer_class = IndividualUserLoginSerializer
-
+    permission_classes = [AllowAny]
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         try:
@@ -54,7 +57,7 @@ class IndividualLoginView(generics.GenericAPIView):
 
 class BusinessLoginView(generics.GenericAPIView):
     serializer_class = BusinessUserLoginSerializer
-
+    permission_classes = [AllowAny]
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         try:

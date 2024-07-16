@@ -1,28 +1,31 @@
-# analyze/views.py
 import requests
 from django.shortcuts import render, redirect
 from .forms import ImageUploadForm, DesignForm
 from .models import UploadedImage
 from django.conf import settings
+from rest_framework import generics, status
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from .serializers import UploadedImageSerializer
+from rest_framework.views import APIView
 
 FASTAPI_URL = 'http://127.0.0.1:8001/predict/'
 DALLE_API_URL = 'https://api.openai.com/v1/images/generations'
 
-def upload_image(request):
-    if request.method == 'GET':
-        # 새로고침 시 세션 데이터 초기화
-        request.session.pop('result', None)
-        request.session.pop('image_url', None)
-        request.session.pop('design_data', None)
+class UploadImageView(generics.CreateAPIView):
+    queryset = UploadedImage.objects.all()
+    serializer_class = UploadedImageSerializer
+    permission_classes = [IsAuthenticated]
 
-    result = None
-    image_instance = None
-    design_form = DesignForm()
-
-    if request.method == 'POST' and 'upload' in request.POST:
+    def post(self, request, *args, **kwargs):
         form = ImageUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            image_instance = form.save()
+        design_form = DesignForm(request.POST)
+
+        if form.is_valid() and design_form.is_valid():
+            image_instance = form.save(commit=False)
+            image_instance.user = request.user
+            image_instance.save()
+
             with open(image_instance.image.path, 'rb') as f:
                 response = requests.post(FASTAPI_URL, files={'file': f})
                 if response.status_code == 200:
@@ -30,60 +33,80 @@ def upload_image(request):
                         result = response.json()
                         request.session['result'] = result
                         request.session['image_url'] = image_instance.image.url
+                        request.session['image_id'] = image_instance.id
+
+                        # Design data를 세션에 저장
+                        design_data = design_form.cleaned_data
+                        request.session['design_data'] = design_data
+
+                        image_instance.material = result.get('material', '')
+                        image_instance.category = result.get('category', '')
+                        image_instance.color = result.get('color', '')
+                        image_instance.neck_line = design_data.get('neck_line', '')
+                        image_instance.sleeve_length = design_data.get('sleeve_length', '')
+                        image_instance.pattern = design_data.get('pattern', '')
+                        image_instance.pocket = design_data.get('pocket', '')
+                        image_instance.zip = design_data.get('zip', '')
+                        image_instance.button = design_data.get('button', '')
+                        image_instance.b_shape = design_data.get('b_shape', '')
+                        image_instance.b_color = design_data.get('b_color', '')
+                        image_instance.addt_design = design_data.get('addt_design', '')
+                        image_instance.save()
+
+                        print("Session data saved:")
+                        print("result:", request.session.get('result'))
+                        print("image_url:", request.session.get('image_url'))
+                        print("image_id:", request.session.get('image_id'))
+                        print("design_data:", request.session.get('design_data'))
+
                     except requests.exceptions.JSONDecodeError:
                         result = {"error": "Invalid JSON response"}
                 else:
                     result = {"error": f"Error from FastAPI server: {response.status_code}"}
-            # 이미지와 결과가 저장된 후 사용자 입력 폼을 조건에 맞게 표시
-            if result['category'] == 'sweater':
-                design_form.fields['pattern'].required = True
-                design_form.fields['zip'].required = True
-                design_form.fields['button'].required = True
-                design_form.fields['b_shape'].required = True
-                design_form.fields['b_color'].required = True
-            else:
-                design_form.fields['pocket'].required = True
 
-    elif request.method == 'POST' and 'design' in request.POST:
-        design_form = DesignForm(request.POST)
-        if design_form.is_valid():
-            design_data = design_form.cleaned_data
-            request.session['design_data'] = design_data
-            return redirect('dalle_result')
+            return Response({"message": "Image uploaded and analyzed successfully"}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"error": "Invalid form data"}, status=status.HTTP_400_BAD_REQUEST)
 
-    else:
-        form = ImageUploadForm()
+class DalleResultAPIView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    result = request.session.get('result', None)
-    image_url = request.session.get('image_url', None)
+    def post(self, request):
+        print("Session data in DalleResultAPIView:")
+        print("image_id:", request.session.get('image_id'))
+        print("design_data:", request.session.get('design_data'))
+        print("result:", request.session.get('result'))
 
-    return render(request, 'analyze/upload.html', {
-        'form': form,
-        'result': result,
-        'image_url': image_url,
-        'design_form': design_form
-    })
-
-def dalle_result(request):
-    if 'regenerate' in request.POST:
-        prompt = request.session.get('prompt')
-    else:
+        image_id = request.session.get('image_id')
         design_data = request.session.get('design_data')
         result = request.session.get('result')
-        prompt = make_prompt(result, design_data)
-        request.session['prompt'] = prompt
 
-    headers = {"Authorization": f"Bearer {settings.OPENAI_API_KEY}"}
-    data = {
-        "model": "dall-e-3",
-        "prompt": prompt,
-        "size": "1024x1024",
-        "quality": "standard",
-        "n": 1,
-    }
-    response = requests.post(DALLE_API_URL, headers=headers, json=data)
-    image_url = response.json()['data'][0]['url']
-    return render(request, 'analyze/dalle_result.html', {'image_url': image_url})
+        if image_id is None or design_data is None or result is None:
+            return Response({"error": "Missing data in the session"}, status=status.HTTP_400_BAD_REQUEST)
+
+        prompt = make_prompt(result, design_data)
+
+        headers = {"Authorization": f"Bearer {settings.OPENAI_API_KEY}"}
+        data = {
+            "model": "dall-e-3",
+            "prompt": prompt,
+            "size": "1024x1024",
+            "quality": "standard",
+            "n": 1,
+        }
+        response = requests.post(DALLE_API_URL, headers=headers, json=data)
+        if response.status_code == 200:
+            image_url = response.json()['data'][0]['url']
+
+            image_instance = UploadedImage.objects.get(id=image_id)
+            image_instance.prompt = prompt
+            image_instance.dalle_image_url = image_url
+            image_instance.save()
+
+            serializer = UploadedImageSerializer(image_instance)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"error": "Error from DALL-E API"}, status=response.status_code)
 
 def make_prompt(result, design_data):
     material = result['material']
@@ -96,10 +119,10 @@ def make_prompt(result, design_data):
     pocket = design_data.get('pocket', '')
     zip = design_data.get('zip', '')
     button = design_data.get('button', '')
+    b_shape = design_data.get('b_shape', '')
+    b_color = design_data.get('b_color', '')
     addt_design = design_data.get('addt_design', '').split()   
 
-
-     # 프롬프트
     shirts_common_prompt = f"There's a {material} {category}. The color of this {category} is {color}. This {neck_line} {category} is {sleeve_length}."
     pocket_prompt = f"This {category} has a pocket on its {pocket} chest. "
 
@@ -206,7 +229,3 @@ def make_prompt(result, design_data):
     print("전체 프롬프트: ", full_prompt)
 
     return full_prompt
-
-def create_order(request):
-    # 주문서 작성 로직 구현
-    return render(request, 'analyze/create_order.html') 
