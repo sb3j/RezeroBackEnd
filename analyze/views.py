@@ -2,7 +2,7 @@
 import requests
 from django.shortcuts import render, redirect
 from .forms import ImageUploadForm, DesignForm
-from .models import UploadedImage
+from .models import OrderInfo
 from django.conf import settings
 
 FASTAPI_URL = 'http://127.0.0.1:8001/predict/'
