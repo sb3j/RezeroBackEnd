@@ -14,62 +14,6 @@ from django.core.files.storage import default_storage
 FASTAPI_URL = 'http://127.0.0.1:8001/predict/'
 DALLE_API_URL = 'https://api.openai.com/v1/images/generations'
 
-# class UploadImageView(generics.CreateAPIView):
-#     queryset = UploadedImage.objects.all()
-#     serializer_class = UploadedImageSerializer
-#     permission_classes = [IsAuthenticated]
-
-#     def post(self, request, *args, **kwargs):
-#         form = ImageUploadForm(request.POST, request.FILES)
-#         design_form = DesignForm(request.POST)
-
-#         if form.is_valid() and design_form.is_valid():
-#             image_instance = form.save(commit=False)
-#             image_instance.user = request.user
-#             image_instance.save()
-
-#             with open(image_instance.image.path, 'rb') as f:
-#                 response = requests.post(FASTAPI_URL, files={'file': f})
-#                 if response.status_code == 200:
-#                     try:
-#                         result = response.json()
-#                         request.session['result'] = result
-#                         request.session['image_url'] = image_instance.image.url
-#                         request.session['image_id'] = image_instance.id
-
-#                         # Design data를 세션에 저장
-#                         design_data = design_form.cleaned_data
-#                         request.session['design_data'] = design_data
-
-#                         image_instance.material = result.get('material', '')
-#                         image_instance.category = result.get('category', '')
-#                         image_instance.color = result.get('color', '')
-#                         image_instance.neck_line = design_data.get('neck_line', '')
-#                         image_instance.sleeve_length = design_data.get('sleeve_length', '')
-#                         image_instance.pattern = design_data.get('pattern', '')
-#                         image_instance.pocket = design_data.get('pocket', '')
-#                         image_instance.zip = design_data.get('zip', '')
-#                         image_instance.button = design_data.get('button', '')
-#                         image_instance.b_shape = design_data.get('b_shape', '')
-#                         image_instance.b_color = design_data.get('b_color', '')
-#                         image_instance.addt_design = design_data.get('addt_design', '')
-#                         image_instance.save()
-
-#                         print("Session data saved:")
-#                         print("result:", request.session.get('result'))
-#                         print("image_url:", request.session.get('image_url'))
-#                         print("image_id:", request.session.get('image_id'))
-#                         print("design_data:", request.session.get('design_data'))
-
-#                     except requests.exceptions.JSONDecodeError:
-#                         result = {"error": "Invalid JSON response"}
-#                 else:
-#                     result = {"error": f"Error from FastAPI server: {response.status_code}"}
-
-#             return Response({"message": "Image uploaded and analyzed successfully"}, status=status.HTTP_201_CREATED)
-#         else:
-#             return Response({"error": "Invalid form data"}, status=status.HTTP_400_BAD_REQUEST)
-
 
 from rest_framework import generics, status
 from rest_framework.response import Response
