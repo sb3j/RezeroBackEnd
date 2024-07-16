@@ -14,9 +14,9 @@ from .models import OrderInfo
 class UploadedImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderInfo
-        fields = ['user', 'image', 'uploaded_at', 'material', 'category', 'color', 'neck_line', 
-                  'sleeve_length', 'pattern', 'pocket', 'zip', 'button', 'b_shape', 'b_color', 
-                  'addt_design', 'dalle_image_url', 'prompt']
+        fields = ['user', 'image', 'before_image_url', 'uploaded_at', 'material', 'category', 'color', 'neck_line', 
+                  'sleeve_length', 'pattern', 'pocket', 'zip', 'button', 'addt_design', 'dalle_image_url', 'prompt']
+
 
 class DesignRequestSerializer(serializers.Serializer):
     neck_line = serializers.CharField(required=False)
@@ -25,6 +25,4 @@ class DesignRequestSerializer(serializers.Serializer):
     pocket = serializers.CharField(required=False)
     zip = serializers.CharField(required=False)
     button = serializers.CharField(required=False)
-    b_shape = serializers.CharField(required=False)
-    b_color = serializers.CharField(required=False)
     addt_design = serializers.CharField(required=False)
