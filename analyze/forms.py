@@ -1,4 +1,3 @@
-# analyze/forms.py
 from django import forms
 from .models import OrderInfo
 
@@ -15,4 +14,3 @@ class DesignForm(forms.Form):
     zip = forms.CharField(max_length=50, required=False, label="지퍼 추가 여부 (x, half zip-up, full zip-up)")
     button = forms.CharField(max_length=50, required=False, label="버튼 추가 여부 (x, half, full)")
     addt_design = forms.CharField(max_length=100, required=False, label="추가 디자인 (crop, fit)")
-    
