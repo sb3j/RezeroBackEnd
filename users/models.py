@@ -56,4 +56,3 @@ class CustomUser(AbstractUser):
         related_query_name='user',
     )
 
-
