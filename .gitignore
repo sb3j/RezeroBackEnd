@@ -11,3 +11,4 @@ ENV/
 env/
 .venv/
 models/
+media/
