@@ -1,7 +1,9 @@
 from rest_framework import serializers
-from .models import OrderInfo
+from .models import UploadedImage
 
-class OrderInfoSerializer(serializers.ModelSerializer):
+class UploadedImageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = OrderInfo
-        fields = '__all__'
+        model = UploadedImage
+        fields = ['user', 'image', 'uploaded_at', 'material', 'category', 'color', 'neck_line', 
+                  'sleeve_length', 'pattern', 'pocket', 'zip', 'button', 'b_shape', 'b_color', 
+                  'addt_design', 'dalle_image_url', 'prompt']
