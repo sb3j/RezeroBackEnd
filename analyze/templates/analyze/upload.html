@@ -3,38 +3,30 @@
 <head>
     <title>Upload Image</title>
     <script>
-        function updateForm() {
+        document.addEventListener("DOMContentLoaded", function() {
             var category = "{{ result.category }}";
-            var neckLineField = document.getElementById("id_neck_line").parentElement;
-            var sleeveLengthField = document.getElementById("id_sleeve_length").parentElement;
-            var patternField = document.getElementById("id_pattern").parentElement;
-            var pocketField = document.getElementById("id_pocket").parentElement;
-            var zipField = document.getElementById("id_zip").parentElement;
-            var buttonField = document.getElementById("id_button").parentElement;
-            var bShapeField = document.getElementById("id_b_shape").parentElement;
-            var bColorField = document.getElementById("id_b_color").parentElement;
-            var addtDesignField = document.getElementById("id_addt_design").parentElement;
+            if (category) {
+                var patternField = document.getElementById("id_pattern").parentElement;
+                var pocketField = document.getElementById("id_pocket").parentElement;
+                var zipField = document.getElementById("id_zip").parentElement;
+                var buttonField = document.getElementById("id_button").parentElement;
 
-            // Hide all fields initially
-            patternField.style.display = "none";
-            pocketField.style.display = "none";
-            zipField.style.display = "none";
-            buttonField.style.display = "none";
-            bShapeField.style.display = "none";
-            bColorField.style.display = "none";
+                // Hide all fields initially
+                patternField.style.display = "none";
+                pocketField.style.display = "none";
+                zipField.style.display = "none";
+                buttonField.style.display = "none";
 
-            // Show fields based on category
-            if (category == "sweater") {
-                patternField.style.display = "block";
-                zipField.style.display = "block";
-                buttonField.style.display = "block";
-                bShapeField.style.display = "block";
-                bColorField.style.display = "block";
-            } else {
-                pocketField.style.display = "block";
+                // Show fields based on category
+                if (category === "sweater") {
+                    patternField.style.display = "block";
+                    zipField.style.display = "block";
+                    buttonField.style.display = "block";
+                } else if (category === "t-shirt" || category === "shirt") {
+                    pocketField.style.display = "block";
+                }
             }
-        }
-        window.onload = updateForm;
+        });
     </script>
 </head>
 <body>
@@ -60,7 +52,7 @@
     </form>
 
     <h2>Design Your Clothing</h2>
-    <form method="post" action="{% url 'upload_image' %}">
+    <form method="post" action="{% url 'dalle_result' %}">
         {% csrf_token %}
         {{ design_form.as_p }}
         <button type="submit" name="design">Generate Image</button>
