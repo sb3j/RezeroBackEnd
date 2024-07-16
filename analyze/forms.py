@@ -1,10 +1,10 @@
 # analyze/forms.py
 from django import forms
-from .models import UploadedImage
+from .models import OrderInfo
 
 class ImageUploadForm(forms.ModelForm):
     class Meta:
-        model = UploadedImage
+        model = OrderInfo
         fields = ['image']
 
 class DesignForm(forms.Form):
