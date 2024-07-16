@@ -8,6 +8,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .serializers import UploadedImageSerializer, DesignRequestSerializer
 from rest_framework.views import APIView
+import os
+from django.core.files.storage import default_storage
 
 FASTAPI_URL = 'http://127.0.0.1:8001/predict/'
 DALLE_API_URL = 'https://api.openai.com/v1/images/generations'
@@ -69,6 +71,20 @@ DALLE_API_URL = 'https://api.openai.com/v1/images/generations'
 #             return Response({"error": "Invalid form data"}, status=status.HTTP_400_BAD_REQUEST)
 
 
+from rest_framework import generics, status
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from .models import OrderInfo
+from .serializers import UploadedImageSerializer
+from .forms import ImageUploadForm
+
+from rest_framework import generics, status
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from .models import OrderInfo
+from .serializers import UploadedImageSerializer
+from .forms import ImageUploadForm
+
 class UploadImageView(generics.CreateAPIView):
     queryset = OrderInfo.objects.all()
     serializer_class = UploadedImageSerializer
@@ -82,13 +98,18 @@ class UploadImageView(generics.CreateAPIView):
             image_instance.user = request.user
             image_instance.save()
 
+            # before 이미지 URL 생성 및 저장
+            before_image_url = request.build_absolute_uri(image_instance.image.url)
+            image_instance.before_image_url = before_image_url  # URL 필드에 저장
+            image_instance.save()  # URL 필드 저장 후 다시 저장
+
             with open(image_instance.image.path, 'rb') as f:
                 response = requests.post(FASTAPI_URL, files={'file': f})
                 if response.status_code == 200:
                     try:
                         result = response.json()
                         request.session['result'] = result
-                        request.session['image_url'] = image_instance.image.url
+                        request.session['image_url'] = before_image_url
                         request.session['image_id'] = image_instance.id
 
                         image_instance.material = result.get('material', '')
@@ -106,10 +127,11 @@ class UploadImageView(generics.CreateAPIView):
                 else:
                     result = {"error": f"Error from FastAPI server: {response.status_code}"}
 
-            return Response({"message": "Image uploaded and analyzed successfully", "category": result.get('category')}, status=status.HTTP_201_CREATED)
+            return Response({"message": "Image uploaded and analyzed successfully", "category": result.get('category'), "before_image_url": before_image_url}, status=status.HTTP_201_CREATED)
         else:
             return Response({"error": "Invalid form data"}, status=status.HTTP_400_BAD_REQUEST)
 
+        
 class RequestDesignView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = DesignRequestSerializer
@@ -155,8 +177,6 @@ class RequestDesignView(generics.CreateAPIView):
                 image_instance.pocket = design_data.get('pocket', '')
                 image_instance.zip = design_data.get('zip', '')
                 image_instance.button = design_data.get('button', '')
-                image_instance.b_shape = design_data.get('b_shape', '')
-                image_instance.b_color = design_data.get('b_color', '')
                 image_instance.addt_design = design_data.get('addt_design', '')
                 image_instance.save()
 
@@ -203,14 +223,33 @@ class DalleResultAPIView(APIView):
         response = requests.post(DALLE_API_URL, headers=headers, json=data)
         if response.status_code == 200:
             image_url = response.json()['data'][0]['url']
+            
+            # 다운로드 및 저장
+            image_response = requests.get(image_url)
+            if image_response.status_code == 200:
+                # 폴더 경로 생성
+                folder_path = os.path.join(settings.MEDIA_ROOT, 'images/after')
+                os.makedirs(folder_path, exist_ok=True)
 
-            image_instance = OrderInfo.objects.get(id=image_id)
-            image_instance.prompt = prompt
-            image_instance.dalle_image_url = image_url
-            image_instance.save()
+                file_name = f"dalle_{image_id}.png"
+                file_path = os.path.join(folder_path, file_name)
+                
+                with open(file_path, 'wb') as f:
+                    f.write(image_response.content)
+                
+                # 업로드된 이미지를 Django의 FileField로 저장
+                image_instance = OrderInfo.objects.get(id=image_id)
+                image_instance.prompt = prompt
 
-            serializer = UploadedImageSerializer(image_instance)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+                # absolute URL을 통해 웹 브라우저에서 접근 가능하게 함
+                after_image_url = request.build_absolute_uri(default_storage.url(os.path.join('images/after', file_name)))
+                image_instance.dalle_image_url = after_image_url
+                image_instance.save()
+
+                serializer = UploadedImageSerializer(image_instance)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response({"error": "Error downloading the image"}, status=image_response.status_code)
         else:
             return Response({"error": "Error from DALL-E API"}, status=response.status_code)
 
@@ -225,8 +264,6 @@ def make_prompt(result, design_data):
     pocket = design_data.get('pocket', '')
     zip = design_data.get('zip', '')
     button = design_data.get('button', '')
-    b_shape = design_data.get('b_shape', '')
-    b_color = design_data.get('b_color', '')
     addt_design = design_data.get('addt_design', '').split()   
 
     shirts_common_prompt = f"There's a {material} {category}. The color of this {category} is {color}. This {neck_line} {category} is {sleeve_length}."
