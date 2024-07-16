@@ -39,6 +39,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React 개발 서버 주소
 ]
+CORS_EXPOSE_HEADERS = ['Authorization', 'Refresh-Token']
 # Application definition
 
 INSTALLED_APPS = [
