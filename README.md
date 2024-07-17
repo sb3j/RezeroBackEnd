@@ -35,10 +35,7 @@ venv\Scripts\activate # 가상환경 활성화
 
 ### 패키지 설치
 ```bash
-# requirements.txt에서 마지막줄 지우기(scikit_image-0.24.0-cp312-cp312-win_amd64.whl)
 pip install -r requirements.txt
-pip install scikit-image==0.24.0
-pip install django-filter==24.2
 ```
 
 ### 프로젝트 설정
@@ -50,8 +47,8 @@ python manage.py migrate
 ### 웹서버 & fastapi 실행
 ```bash
 # cmd 창 각각 사용하기
-python manage.py runserver
-uvicorn fastapi_app.main:app --reload --port 8001
+python manage.py runserver # 웹서버
+uvicorn fastapi_app.main:app --reload --port 8001 # fastapi
 # 웹서버 실행 확인: http://127.0.0.1:8000/
 # fastapi 실행 확인: http://127.0.0.1:8001/docs
 ```
