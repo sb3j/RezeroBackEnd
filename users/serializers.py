@@ -2,8 +2,8 @@ from rest_framework import serializers
 from django.contrib.auth import authenticate, password_validation
 from .models import CustomUser
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
+
 
 class IndividualUserCreationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[password_validation.validate_password])
@@ -56,6 +56,9 @@ class BusinessUserCreationSerializer(serializers.ModelSerializer):
         if not attrs.get('agree_terms') or not attrs.get('agree_privacy'):
             raise serializers.ValidationError({"agree_terms": "이용약관 및 개인정보처리방침에 동의해야 합니다."})
 
+        if CustomUser.objects.filter(company_name=attrs['company_name'], user_type='business').exists():
+            raise serializers.ValidationError({"company_name": "이 회사 이름은 이미 사용 중입니다."})
+
         return attrs
 
     def create(self, validated_data):
@@ -106,24 +109,22 @@ class IndividualUserLoginSerializer(serializers.Serializer):
             'refresh': str(refresh),
             'access': str(refresh.access_token),
         }
-        
+
 class UserProfileSerializer(serializers.ModelSerializer):
-    orders_count = serializers.IntegerField(source='orders.count', read_only=True)
-    bookmarks_count = serializers.IntegerField(source='bookmarks.count', read_only=True)
+    orders_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = CustomUser
-        fields = ['username', 'nickname', 'phone', 'address', 'detail_address', 'profile_picture', 'user_type', 'orders_count', 'bookmarks_count']
+        fields = ['username', 'nickname', 'phone', 'address', 'detail_address', 'profile_picture', 'user_type', 'orders_count']
         extra_kwargs = {
             'username': {'read_only': True},
             'user_type': {'read_only': True},
             'phone': {'required': False, 'allow_blank': True},
             'profile_picture': {'required': False, 'allow_null': True}
-        }      
-
+        }
 
 class BusinessUserProfileSerializer(serializers.ModelSerializer):
-    order_requests_count = serializers.IntegerField(source='order_requests.count', read_only=True)
+    order_requests_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = CustomUser
@@ -166,10 +167,6 @@ class BusinessUserLoginSerializer(serializers.Serializer):
             'access': str(refresh.access_token),
         }
 
-
-
-
-    
 class UserDeleteSerializer(serializers.Serializer):
     agree_terms = serializers.BooleanField(write_only=True)
     reason = serializers.CharField(write_only=True, required=False, allow_blank=True)
@@ -195,3 +192,14 @@ class ChangePasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError("새로운 비밀번호가 일치하지 않습니다.")
         password_validation.validate_password(data['new_password'])
         return data
+    
+    
+
+class UsernameCheckSerializer(serializers.Serializer):
+    username = serializers.CharField()
+
+class NicknameCheckSerializer(serializers.Serializer):
+    nickname = serializers.CharField()
+
+class CompanyNameCheckSerializer(serializers.Serializer):
+    company_name = serializers.CharField()
