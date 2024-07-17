@@ -13,8 +13,64 @@ from django.core.files.storage import default_storage
  
 FASTAPI_URL = 'http://127.0.0.1:8001/predict/'
 DALLE_API_URL = 'https://api.openai.com/v1/images/generations'
- 
- 
+
+# class UploadImageView(generics.CreateAPIView):
+#     queryset = UploadedImage.objects.all()
+#     serializer_class = UploadedImageSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def post(self, request, *args, **kwargs):
+#         form = ImageUploadForm(request.POST, request.FILES)
+#         design_form = DesignForm(request.POST)
+
+#         if form.is_valid() and design_form.is_valid():
+#             image_instance = form.save(commit=False)
+#             image_instance.user = request.user
+#             image_instance.save()
+
+#             with open(image_instance.image.path, 'rb') as f:
+#                 response = requests.post(FASTAPI_URL, files={'file': f})
+#                 if response.status_code == 200:
+#                     try:
+#                         result = response.json()
+#                         request.session['result'] = result
+#                         request.session['image_url'] = image_instance.image.url
+#                         request.session['image_id'] = image_instance.id
+
+#                         # Design data를 세션에 저장
+#                         design_data = design_form.cleaned_data
+#                         request.session['design_data'] = design_data
+
+#                         image_instance.material = result.get('material', '')
+#                         image_instance.category = result.get('category', '')
+#                         image_instance.color = result.get('color', '')
+#                         image_instance.neck_line = design_data.get('neck_line', '')
+#                         image_instance.sleeve_length = design_data.get('sleeve_length', '')
+#                         image_instance.pattern = design_data.get('pattern', '')
+#                         image_instance.pocket = design_data.get('pocket', '')
+#                         image_instance.zip = design_data.get('zip', '')
+#                         image_instance.button = design_data.get('button', '')
+#                         image_instance.b_shape = design_data.get('b_shape', '')
+#                         image_instance.b_color = design_data.get('b_color', '')
+#                         image_instance.addt_design = design_data.get('addt_design', '')
+#                         image_instance.save()
+
+#                         print("Session data saved:")
+#                         print("result:", request.session.get('result'))
+#                         print("image_url:", request.session.get('image_url'))
+#                         print("image_id:", request.session.get('image_id'))
+#                         print("design_data:", request.session.get('design_data'))
+
+#                     except requests.exceptions.JSONDecodeError:
+#                         result = {"error": "Invalid JSON response"}
+#                 else:
+#                     result = {"error": f"Error from FastAPI server: {response.status_code}"}
+
+#             return Response({"message": "Image uploaded and analyzed successfully"}, status=status.HTTP_201_CREATED)
+#         else:
+#             return Response({"error": "Invalid form data"}, status=status.HTTP_400_BAD_REQUEST)
+
+
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -204,18 +260,18 @@ def make_prompt(result, design_data):
    
     neck_line = design_data['neck_line']
     sleeve_length = design_data['sleeve_length']
-    pattern = design_data.get('pattern', 'x') if design_data.get('pattern', 'x') != '' else 'x'
-    pocket = design_data.get('pocket', 'x') if design_data.get('pocket', 'x') != '' else 'x'
-    zip = design_data.get('zip', 'x') if design_data.get('zip', 'x') != '' else 'x'
-    button = design_data.get('button', 'x') if design_data.get('button', 'x') != '' else 'x'
-    addt_design = design_data.get('addt_design', '').split()  
- 
+    pattern = design_data.get('pattern', '')
+    pocket = design_data.get('pocket', '')
+    zip = design_data.get('zip', '')
+    button = design_data.get('button', '')
+    addt_design = design_data.get('addt_design', '').split()   
+
     shirts_common_prompt = f"There's a {material} {category}. The color of this {category} is {color}. This {neck_line} {category} is {sleeve_length}."
     pocket_prompt = f"This {category} has a pocket on its {pocket} chest. "
  
     sweater_neck_common_prompt = f"There's a {material} {category}. The color of this {category} is {color}. This {neck_line} {category} is {pattern} pattern and {sleeve_length}. "
     zip_prompt = f"Also, the {category} is a {zip}."
- 
+
     if button:
         button_prompt = f"Also, this {category} has buttons {button}. They are on the {category} at regular intervals. "
     else:
@@ -224,7 +280,7 @@ def make_prompt(result, design_data):
     crop_prompt = f"The waist of the {category} is a short cropped shape. "
     fit_prompt = f"This {category} is shrunk to fit body shape. "
     background_prompt = f"And it's hanging on a hanger. The background should be plain white. "
- 
+
     full_prompt = ""
  
     if category == 'sweater':
