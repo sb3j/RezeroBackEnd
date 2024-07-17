@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'analyze',
     'django_filters',
     'order',
+    'corsheaders',
 ]
  
 
