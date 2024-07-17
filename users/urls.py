@@ -1,5 +1,10 @@
 from django.urls import path
-from .views import BusinessUserProfileView, ChangePasswordView, IndividualRegisterView, BusinessRegisterView,IndividualLoginView, BusinessLoginView, UserDeleteView, UserProfileView
+from .views import (
+    BusinessUserProfileView, ChangePasswordView, IndividualRegisterView, 
+    BusinessRegisterView, IndividualLoginView, BusinessLoginView, 
+    UserDeleteView, UserProfileView, UsernameCheckView, 
+    NicknameCheckView, CompanyNameCheckView
+)
 
 urlpatterns = [
     path('register/', IndividualRegisterView.as_view(), name='individual-register'),
@@ -10,4 +15,7 @@ urlpatterns = [
     path('profile/b', BusinessUserProfileView.as_view(), name='business-user-profile'),
     path('del/', UserDeleteView.as_view(), name='user-delete'),
     path('pw/', ChangePasswordView.as_view(), name='change-password'),
+    path('username-check/', UsernameCheckView.as_view(), name='username-check'),
+    path('nickname-check/', NicknameCheckView.as_view(), name='nickname-check'),
+    path('companyname-check/', CompanyNameCheckView.as_view(), name='companyname-check'),
 ]

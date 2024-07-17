@@ -12,7 +12,9 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers import ChangePasswordSerializer
 from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny 
+from rest_framework.permissions import AllowAny
+from .serializers import UsernameCheckSerializer, NicknameCheckSerializer, CompanyNameCheckSerializer
+from rest_framework import views, status
 
 
 
@@ -101,7 +103,8 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
             "변경 전화번호": serializer.validated_data.get('phone', instance.phone),
             "변경 주소": serializer.validated_data.get('address', instance.address),
             "변경 상세주소": serializer.validated_data.get('detail_address', instance.detail_address),
-            "프로필 사진": request.build_absolute_uri(instance.profile_picture.url) if instance.profile_picture else None
+            "프로필 사진": request.build_absolute_uri(instance.profile_picture.url) if instance.profile_picture else None,
+            "orders_count": instance.orders_count  # 추가된 부분
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
@@ -128,12 +131,11 @@ class BusinessUserProfileView(generics.RetrieveUpdateAPIView):
             "변경 전화번호": serializer.validated_data.get('phone', instance.phone),
             "변경 주소": serializer.validated_data.get('address', instance.address),
             "변경 상세주소": serializer.validated_data.get('detail_address', instance.detail_address),
-            "변경 프로필이미지": request.build_absolute_uri(instance.profile_picture.url) if instance.profile_picture else None
+            "변경 프로필이미지": request.build_absolute_uri(instance.profile_picture.url) if instance.profile_picture else None,
+            "order_requests_count": instance.order_requests_count  # 추가된 부분
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
-
-
 
 class UserDeleteView(generics.GenericAPIView):
     serializer_class = UserDeleteSerializer
@@ -168,4 +170,37 @@ class ChangePasswordView(generics.UpdateAPIView):
             user.set_password(serializer.validated_data['new_password'])
             user.save()
             return Response({"message": "비밀번호가 성공적으로 변경되었습니다."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+
+
+class UsernameCheckView(views.APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = UsernameCheckSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            if CustomUser.objects.filter(username=username).exists():
+                return Response({"available": False, "message": "Username is already taken."}, status=status.HTTP_200_OK)
+            return Response({"available": True, "message": "Username is available."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class NicknameCheckView(views.APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = NicknameCheckSerializer(data=request.data)
+        if serializer.is_valid():
+            nickname = serializer.validated_data['nickname']
+            if CustomUser.objects.filter(nickname=nickname).exists():
+                return Response({"available": False, "message": "Nickname is already taken."}, status=status.HTTP_200_OK)
+            return Response({"available": True, "message": "Nickname is available."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class CompanyNameCheckView(views.APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = CompanyNameCheckSerializer(data=request.data)
+        if serializer.is_valid():
+            company_name = serializer.validated_data['company_name']
+            if CustomUser.objects.filter(company_name=company_name, user_type='business').exists():
+                return Response({"available": False, "message": "Company name is already taken."}, status=status.HTTP_200_OK)
+            return Response({"available": True, "message": "Company name is available."}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
