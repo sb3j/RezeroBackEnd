@@ -89,3 +89,10 @@ class FixSerializer(serializers.ModelSerializer):
     class Meta:
         model = Fix
         fields = ['id', 'user_nickname', 'material', 'category', 'color', 'created_at', 'fixed_at']
+
+
+
+class CompanyNameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['company_name']

@@ -73,3 +73,19 @@ class AcceptedOrderListView(generics.ListAPIView):
         if user.user_type != 'business':
             return Fix.objects.none()  # 비즈니스 사용자가 아닌 경우 빈 쿼리셋 반환
         return Fix.objects.filter(business_user=user).order_by('-fixed_at')
+    
+    
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from users.models import CustomUser
+
+class CompanyNamesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        business_users = CustomUser.objects.filter(user_type='business')
+        company_names = business_users.values_list('company_name', flat=True)
+        return Response(list(company_names), status=status.HTTP_200_OK)
