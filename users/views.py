@@ -176,6 +176,7 @@ class ChangePasswordView(generics.UpdateAPIView):
 
 
 class UsernameCheckView(views.APIView):
+    permission_classes = [AllowAny]
     def post(self, request, *args, **kwargs):
         serializer = UsernameCheckSerializer(data=request.data)
         if serializer.is_valid():
@@ -186,6 +187,7 @@ class UsernameCheckView(views.APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class NicknameCheckView(views.APIView):
+    permission_classes = [AllowAny]
     def post(self, request, *args, **kwargs):
         serializer = NicknameCheckSerializer(data=request.data)
         if serializer.is_valid():
@@ -196,6 +198,7 @@ class NicknameCheckView(views.APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CompanyNameCheckView(views.APIView):
+    permission_classes = [AllowAny]
     def post(self, request, *args, **kwargs):
         serializer = CompanyNameCheckSerializer(data=request.data)
         if serializer.is_valid():
