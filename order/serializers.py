@@ -95,3 +95,70 @@ class CompanyNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['company_name']
+        
+
+
+# class OrderInfoSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = OrderInfo
+#         fields = ['uploaded_at', 'material', 'category']
+
+
+
+class UserOrderSerializer(serializers.ModelSerializer):
+    company_name = serializers.CharField(source='business_user.company_name', read_only=True)
+    status = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Order
+        fields = ['id', 'created_at', 'company_name', 'status', 'category']
+
+    def get_status(self, obj):
+        try:
+            if Fix.objects.filter(order=obj).exists():
+                fix = Fix.objects.get(order=obj)
+                if fix.is_completed:
+                    return '완료'
+                return '수락'
+        except Fix.DoesNotExist:
+            pass
+
+        try:
+            Order.objects.get(id=obj.id)
+            return '대기'
+        except Order.DoesNotExist:
+            return '거절'
+
+    def get_category(self, obj):
+        return obj.order_info.category if obj.order_info else None
+
+class UserOrderDetailSerializer(serializers.ModelSerializer):
+    company_name = serializers.CharField(source='business_user.company_name', read_only=True)
+    status = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField()
+    before_image_url = serializers.CharField(source='order_info.before_image_url', read_only=True)
+    dalle_image_url = serializers.CharField(source='order_info.dalle_image_url', read_only=True)
+
+    class Meta:
+        model = Order
+        fields = ['id', 'created_at', 'company_name', 'category', 'before_image_url', 'dalle_image_url', 'status']
+
+    def get_status(self, obj):
+        try:
+            if Fix.objects.filter(order=obj).exists():
+                fix = Fix.objects.get(order=obj)
+                if fix.is_completed:
+                    return '완료'
+                return '수락'
+        except Fix.DoesNotExist:
+            pass
+
+        try:
+            Order.objects.get(id=obj.id)
+            return '대기'
+        except Order.DoesNotExist:
+            return '거절'
+
+    def get_category(self, obj):
+        return obj.order_info.category if obj.order_info else None

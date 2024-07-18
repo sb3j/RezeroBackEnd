@@ -57,6 +57,7 @@ class AcceptOrderView(generics.UpdateAPIView):
         try:
             order = Order.objects.get(id=order_id, business_user=request.user)
             fix, created = Fix.objects.get_or_create(
+                order=order, 
                 user_nickname=order.user.nickname,
                 material=order.material,
                 category=order.category,
@@ -65,8 +66,7 @@ class AcceptOrderView(generics.UpdateAPIView):
                 business_user=request.user
             )
             if created:
-                fix.save()  # save 메소드 호출하여 deadline 및 is_completed 설정
-                order.delete()  # 원래 Order에서 삭제
+                fix.save() 
                 return Response({"detail": "Order accepted."}, status=status.HTTP_200_OK)
             else:
                 return Response({"detail": "This order is already accepted."}, status=status.HTTP_400_BAD_REQUEST)
@@ -74,7 +74,6 @@ class AcceptOrderView(generics.UpdateAPIView):
             return Response({"detail": "Order not found or you do not have permission to accept this order."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 
 class AcceptedOrderListView(generics.ListAPIView):
@@ -106,3 +105,28 @@ class CompanyNamesView(APIView):
         business_users = CustomUser.objects.filter(user_type='business')
         company_names = business_users.values_list('company_name', flat=True)
         return Response(list(company_names), status=status.HTTP_200_OK)
+
+
+from rest_framework import generics, permissions, filters
+from .models import Order
+from .serializers import UserOrderSerializer, UserOrderDetailSerializer
+from .pagination import StandardResultsSetPagination
+
+
+class UserOrderListView(generics.ListAPIView):
+    serializer_class = UserOrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['created_at']
+    ordering = ['-created_at']
+
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user)
+
+class UserOrderDetailView(generics.RetrieveAPIView):
+    serializer_class = UserOrderDetailSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user)
