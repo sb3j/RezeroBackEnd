@@ -88,9 +88,8 @@ from .models import Fix
 class FixSerializer(serializers.ModelSerializer):
     class Meta:
         model = Fix
-        fields = ['id', 'user_nickname', 'material', 'category', 'color', 'created_at', 'fixed_at']
-
-
+        fields = ['id', 'user_nickname', 'material', 'category', 'color', 'created_at', 'fixed_at', 'deadline', 'is_completed']
+        read_only_fields = ['created_at', 'fixed_at', 'deadline', 'is_completed']
 
 class CompanyNameSerializer(serializers.ModelSerializer):
     class Meta:

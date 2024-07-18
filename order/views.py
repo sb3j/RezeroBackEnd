@@ -2,6 +2,7 @@ from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from order.serializers import OrderSerializer, OrderRequestSerializer, FixSerializer
 from .pagination import StandardResultsSetPagination
+from rest_framework import generics, filters
 from .models import Order, Fix
 from rest_framework.permissions import IsAuthenticated
 
@@ -23,17 +24,29 @@ class RejectOrderView(generics.UpdateAPIView):
         order.delete()
         return Response({"detail": "주문을 거절했습니다."}, status=status.HTTP_200_OK)
 
+
+
 class OrderRequestListView(generics.ListAPIView):
     serializer_class = OrderRequestSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     pagination_class = StandardResultsSetPagination
+    filter_backends = [filters.OrderingFilter, filters.SearchFilter]
+    ordering_fields = ['created_at']
+    ordering = ['-created_at']
+    search_fields = ['user__nickname', 'id']  # user__nickname은 외래 키를 통해 접근
 
     def get_queryset(self):
         user = self.request.user
         if user.user_type != 'business':
             return Order.objects.none()  # 비즈니스 사용자가 아닌 경우 빈 쿼리셋 반환
-        return Order.objects.filter(business_user=user).order_by('-created_at')
+        return Order.objects.filter(business_user=user)
 
+
+
+from rest_framework import generics, status
+from rest_framework.response import Response
+from .models import Order, Fix
+from .serializers import FixSerializer
 
 class AcceptOrderView(generics.UpdateAPIView):
     queryset = Order.objects.all()
@@ -51,11 +64,12 @@ class AcceptOrderView(generics.UpdateAPIView):
                 created_at=order.created_at,
                 business_user=request.user
             )
-            if not created:
+            if created:
+                fix.save()  # save 메소드 호출하여 deadline 및 is_completed 설정
+                order.delete()  # 원래 Order에서 삭제
+                return Response({"detail": "Order accepted."}, status=status.HTTP_200_OK)
+            else:
                 return Response({"detail": "This order is already accepted."}, status=status.HTTP_400_BAD_REQUEST)
-
-            order.delete()  # 원래 Order에서 삭제
-            return Response({"detail": "Order accepted."}, status=status.HTTP_200_OK)
         except Order.DoesNotExist:
             return Response({"detail": "Order not found or you do not have permission to accept this order."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
@@ -67,13 +81,16 @@ class AcceptedOrderListView(generics.ListAPIView):
     serializer_class = FixSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = StandardResultsSetPagination
+    filter_backends = [filters.OrderingFilter, filters.SearchFilter]
+    ordering_fields = ['created_at', 'fixed_at']
+    ordering = ['-created_at']
+    search_fields = ['id', 'user_nickname']  # 주문 ID와 사용자 닉네임으로 검색
 
     def get_queryset(self):
         user = self.request.user
         if user.user_type != 'business':
             return Fix.objects.none()  # 비즈니스 사용자가 아닌 경우 빈 쿼리셋 반환
-        return Fix.objects.filter(business_user=user).order_by('-fixed_at')
-    
+        return Fix.objects.filter(business_user=user)
     
 
 from rest_framework.views import APIView
