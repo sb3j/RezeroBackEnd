@@ -115,11 +115,11 @@ WSGI_APPLICATION = "remage.wsgi.application"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'remage',
+        'NAME': 'rezero',
         'USER': 'root',
-        'PASSWORD': 'aivle',
-        'HOST': 'localhost',  
-        'PORT': '3306',
+        'PASSWORD': '1234',
+        'HOST': 'localhost',   
+        'PORT': '3307',
     }
 }
  
