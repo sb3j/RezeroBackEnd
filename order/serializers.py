@@ -115,20 +115,13 @@ class UserOrderSerializer(serializers.ModelSerializer):
         fields = ['id', 'created_at', 'company_name', 'status', 'category']
 
     def get_status(self, obj):
-        try:
-            if Fix.objects.filter(order=obj).exists():
-                fix = Fix.objects.get(order=obj)
-                if fix.is_completed:
-                    return '완료'
-                return '수락'
-        except Fix.DoesNotExist:
-            pass
-
-        try:
-            Order.objects.get(id=obj.id)
-            return '대기'
-        except Order.DoesNotExist:
-            return '거절'
+        status_mapping = {
+            'PENDING': '대기',
+            'ACCEPTED': '수락',
+            'REJECTED': '거절',
+            'COMPLETED': '완료'
+        }
+        return status_mapping.get(obj.status, '대기')
 
     def get_category(self, obj):
         return obj.order_info.category if obj.order_info else None
@@ -145,20 +138,13 @@ class UserOrderDetailSerializer(serializers.ModelSerializer):
         fields = ['id', 'created_at', 'company_name', 'category', 'before_image_url', 'dalle_image_url', 'status']
 
     def get_status(self, obj):
-        try:
-            if Fix.objects.filter(order=obj).exists():
-                fix = Fix.objects.get(order=obj)
-                if fix.is_completed:
-                    return '완료'
-                return '수락'
-        except Fix.DoesNotExist:
-            pass
-
-        try:
-            Order.objects.get(id=obj.id)
-            return '대기'
-        except Order.DoesNotExist:
-            return '거절'
+        status_mapping = {
+            'PENDING': '대기',
+            'ACCEPTED': '수락',
+            'REJECTED': '거절',
+            'COMPLETED': '완료'
+        }
+        return status_mapping.get(obj.status, '대기')
 
     def get_category(self, obj):
         return obj.order_info.category if obj.order_info else None

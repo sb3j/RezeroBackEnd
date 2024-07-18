@@ -11,17 +11,31 @@ class CreateOrderView(generics.CreateAPIView):
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+# class RejectOrderView(generics.UpdateAPIView):
+#     queryset = Order.objects.all()
+#     permission_classes = [permissions.IsAuthenticated]
+
+#     def update(self, request, *args, **kwargs):
+#         order = self.get_object()
+#         if order.business_user != request.user:
+#             return Response({"detail": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
+
+#         # Order 삭제
+#         order.delete()
+#         return Response({"detail": "주문을 거절했습니다."}, status=status.HTTP_200_OK)
+
 class RejectOrderView(generics.UpdateAPIView):
     queryset = Order.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def update(self, request, *args, **kwargs):
         order = self.get_object()
         if order.business_user != request.user:
             return Response({"detail": "권한이 없습니다."}, status=status.HTTP_403_FORBIDDEN)
 
-        # Order 삭제
-        order.delete()
+        # Order 상태를 거절로 변경
+        order.status = '거절'
+        order.save()
         return Response({"detail": "주문을 거절했습니다."}, status=status.HTTP_200_OK)
 
 
@@ -57,7 +71,7 @@ class AcceptOrderView(generics.UpdateAPIView):
         try:
             order = Order.objects.get(id=order_id, business_user=request.user)
             fix, created = Fix.objects.get_or_create(
-                order=order, 
+                order=order,
                 user_nickname=order.user.nickname,
                 material=order.material,
                 category=order.category,
@@ -66,7 +80,9 @@ class AcceptOrderView(generics.UpdateAPIView):
                 business_user=request.user
             )
             if created:
-                fix.save() 
+                fix.save()
+                order.status = '수락'  # 수락 상태로 변경
+                order.save()
                 return Response({"detail": "Order accepted."}, status=status.HTTP_200_OK)
             else:
                 return Response({"detail": "This order is already accepted."}, status=status.HTTP_400_BAD_REQUEST)
