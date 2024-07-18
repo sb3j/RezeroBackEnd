@@ -1,6 +1,6 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
-from .serializers import IndividualUserCreationSerializer, BusinessUserCreationSerializer, IndividualUserLoginSerializer, BusinessUserLoginSerializer, UserDeleteSerializer
+from .serializers import CustomTokenRefreshSerializer, IndividualUserCreationSerializer, BusinessUserCreationSerializer, IndividualUserLoginSerializer, BusinessUserLoginSerializer, UserDeleteSerializer
 
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
@@ -207,3 +207,54 @@ class CompanyNameCheckView(views.APIView):
                 return Response({"available": False, "message": "Company name is already taken."}, status=status.HTTP_200_OK)
             return Response({"available": True, "message": "Company name is available."}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.response import Response
+from rest_framework import status
+from .serializers import CustomTokenObtainPairSerializer
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = serializer.validated_data['user']
+        refresh = serializer.validated_data['refresh']
+        access = serializer.validated_data['access']
+
+        response = Response(status=status.HTTP_200_OK)
+        response['Authorization'] = 'Bearer ' + str(access)
+        response['Refresh-Token'] = str(refresh)
+        return response
+
+
+
+from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework.response import Response
+from rest_framework import status
+
+class CustomTokenRefreshView(TokenRefreshView):
+    serializer_class = CustomTokenRefreshSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        refresh = serializer.validated_data['refresh']
+        access = serializer.validated_data['access']
+
+        response = Response(status=status.HTTP_200_OK)
+        response['Authorization'] = 'Bearer ' + str(access)
+        response['Refresh-Token'] = str(refresh)
+        return response
