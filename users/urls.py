@@ -19,6 +19,6 @@ urlpatterns = [
     path('username-check/', UsernameCheckView.as_view(), name='username-check'),
     path('nickname-check/', NicknameCheckView.as_view(), name='nickname-check'),
     path('companyname-check/', CompanyNameCheckView.as_view(), name='companyname-check'),
-     path('token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('reissue/', CustomTokenRefreshView.as_view(), name='token_refresh'),
 ]
