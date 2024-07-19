@@ -27,7 +27,7 @@ SECRET_KEY = "django-insecure-e0p0^s=l^$^7$#5@tfbdpv__34#l4h#t^=^#+60ghkh-@0a)b9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
  
-ALLOWED_HOSTS = ['127.0.0.1','43.201.51.98',  'http://localhost:3000', 'rewear.world', 'www.rewear.world']
+ALLOWED_HOSTS = ['127.0.0.1','3.38.253.207' ,'http://localhost:3000']
  
  
  
@@ -36,18 +36,11 @@ import os
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
 
  
  
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  
-    "http://rewear.world",
-    "https://rewear.world"
 ]
 # Application definition
  
@@ -64,10 +57,10 @@ INSTALLED_APPS = [
     'faq',
     'analyze',
     'django_filters',
-    'order',
     'corsheaders',
     'drf_yasg',
     'django.contrib.sites',
+    'order',
 ]
 
 SITE_ID = 1
@@ -153,7 +146,7 @@ DATABASES = {
         'NAME': 'remage',
         'USER': 'root',
         'PASSWORD': 'aivle',
-        'HOST': 'localhost',  
+        'HOST': '127.0.0.1',  
         'PORT': '3306',
     }
 }
