@@ -27,7 +27,7 @@ SECRET_KEY = "django-insecure-e0p0^s=l^$^7$#5@tfbdpv__34#l4h#t^=^#+60ghkh-@0a)b9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
  
-ALLOWED_HOSTS = ['127.0.0.1','43.201.51.98',  'http://localhost:3000', 'rewear.world']
+ALLOWED_HOSTS = ['127.0.0.1','43.201.51.98',  'http://localhost:3000', 'rewear.world', 'www.rewear.world']
  
  
  
