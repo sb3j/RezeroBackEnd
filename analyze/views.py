@@ -204,10 +204,10 @@ def make_prompt(result, design_data):
     
     neck_line = design_data['neck_line']
     sleeve_length = design_data['sleeve_length']
-    pattern = design_data.get('pattern', 'x') if design_data.get('pattern', 'x') != '' else 'x'
-    pocket = design_data.get('pocket', 'x') if design_data.get('pocket', 'x') != '' else 'x'
-    zip = design_data.get('zip', 'x') if design_data.get('zip', 'x') != '' else 'x'
-    button = design_data.get('button', 'x') if design_data.get('button', 'x') != '' else 'x'
+    pattern = design_data.get('pattern', 'n/a') if design_data.get('pattern', 'n/a') != '' else 'n/a'
+    pocket = design_data.get('pocket', 'n/a') if design_data.get('pocket', 'n/a') != '' else 'n/a'
+    zip = design_data.get('zip', 'n/a') if design_data.get('zip', 'n/a') != '' else 'n/a'
+    button = design_data.get('button', 'n/a') if design_data.get('button', 'n/a') != '' else 'n/a'
     addt_design = design_data.get('addt_design', '').split()   
 
     shirts_common_prompt = f"There's a {material} {category}. The color of this {category} is {color}. This {neck_line} {category} is {sleeve_length}. "
@@ -239,8 +239,8 @@ def make_prompt(result, design_data):
             elif len(addt_design) == 2:
                 full_prompt = sweater_neck_common_prompt + crop_prompt + fit_prompt + background_prompt
         else:
-            if zip == 'x':
-                if button == 'x':
+            if zip == 'n/a':
+                if button == 'n/a':
                     if len(addt_design) == 0:
                         full_prompt = sweater_neck_common_prompt + background_prompt
                     elif len(addt_design) == 1:
@@ -271,7 +271,8 @@ def make_prompt(result, design_data):
                             full_prompt = sweater_neck_common_prompt + button_prompt + fit_prompt + background_prompt
                     elif len(addt_design) == 2:
                         full_prompt = sweater_neck_common_prompt + button_prompt + crop_prompt + fit_prompt + background_prompt
-            elif zip == 'half zip-up':
+            elif zip == 'half':
+                zip = 'half zip-up'
                 if len(addt_design) == 0:
                     full_prompt = sweater_neck_common_prompt + zip_prompt + background_prompt
                 elif len(addt_design) == 1:
@@ -281,7 +282,8 @@ def make_prompt(result, design_data):
                         full_prompt = sweater_neck_common_prompt + zip_prompt + fit_prompt + background_prompt
                 elif len(addt_design) == 2:
                     full_prompt = sweater_neck_common_prompt + zip_prompt + crop_prompt + fit_prompt + background_prompt
-            elif zip == 'full zip-up':
+            elif zip == 'full':
+                zip = 'full zip-up'
                 if len(addt_design) == 0:
                     full_prompt = sweater_neck_common_prompt + zip_prompt + background_prompt
                 elif len(addt_design) == 1:
@@ -292,7 +294,7 @@ def make_prompt(result, design_data):
                 elif len(addt_design) == 2:
                     full_prompt = sweater_neck_common_prompt + zip_prompt + crop_prompt + fit_prompt + background_prompt
     else:
-        if pocket == 'x':
+        if pocket == 'n/a':
             if len(addt_design) == 0:
                 full_prompt = shirts_common_prompt + background_prompt
             elif len(addt_design) == 1:
