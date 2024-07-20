@@ -14,7 +14,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from datetime import timedelta
 from datetime import timedelta
 from pathlib import Path
- 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
  
@@ -28,7 +28,7 @@ SECRET_KEY = "django-insecure-e0p0^s=l^$^7$#5@tfbdpv__34#l4h#t^=^#+60ghkh-@0a)b9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
  
-ALLOWED_HOSTS = ['43.201.51.98',  'http://localhost:3000']
+ALLOWED_HOSTS = ['43.201.51.98',  'http://localhost:3000', 'localhost', '127.0.0.1']
  
  
  
