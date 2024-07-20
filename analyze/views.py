@@ -91,9 +91,8 @@ class RequestDesignView(generics.CreateAPIView):
             material = image_instance.material
             color = image_instance.color
 
-            # 옵션을 결정하는 로직 (예시)
             options = {
-                "neck_line": ["Ccollar", "round neck", "v-neck", "square neck", "turtle neck", "mock neck"] if category == "sweater" else ["collar", "round neck", "v-neck", "square neck"],
+                "neck_line": ["collar", "round neck", "v-neck", "square neck", "turtle neck", "mock neck"] if category == "sweater" else ["collar", "round neck", "v-neck", "square neck"],
                 "sleeve_length": ["long-sleeved", "short-sleeved", "sleeveless"],
                 "pattern": ["cable", "waffle", "plain"] if category == "sweater" else [], 
                 "pocket": ['n/a', 'left', 'right'] if not category == "sweater" else [],
