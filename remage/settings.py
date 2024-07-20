@@ -36,10 +36,12 @@ import os
  
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
  
  
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React 개발 서버 주소
+    "http://localhost:3000",  
 ]
 # Application definition
  
@@ -56,11 +58,13 @@ INSTALLED_APPS = [
     'faq',
     'analyze',
     'django_filters',
-    'order',
     'corsheaders',
     'drf_yasg',
+    'django.contrib.sites',
+    'order',
 ]
- 
+
+SITE_ID = 1
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
