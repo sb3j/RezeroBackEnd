@@ -93,10 +93,13 @@ class RequestDesignView(generics.CreateAPIView):
 
             # 옵션을 결정하는 로직 (예시)
             options = {
-                "neck_line": ["V-neck", "Round", "Square"] if category == "shirt" else ["High-neck", "Crew"],
-                "sleeve_length": ["Short", "Long"] if material == "cotton" else ["Sleeveless", "3/4"],
-                "pattern": ["Striped", "Plain", "Checked"] if color == "blue" else ["Polka dots", "Floral"],
-                # 추가 옵션들
+                "neck_line": ["Ccollar", "round neck", "v-neck", "square neck", "turtle neck", "mock neck"] if category == "sweater" else ["collar", "round neck", "v-neck", "square neck"],
+                "sleeve_length": ["long-sleeved", "short-sleeved", "sleeveless"],
+                "pattern": ["cable", "waffle", "plain"] if category == "sweater" else [], 
+                "pocket": ['n/a', 'left', 'right'] if not category == "sweater" else [],
+                "zip": ['n/a', 'half', 'full'] if category == "sweater" else [],
+                "button": ['n/a', 'half', 'full'] if category == "sweater" else [],
+                "addt_design": ['crop', 'fit', 'etc'],
             }
 
             return Response({"options": options}, status=status.HTTP_200_OK)
