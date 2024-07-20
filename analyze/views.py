@@ -71,7 +71,7 @@ class UploadImageView(generics.CreateAPIView):
                 else:
                     result = {"error": f"Error from FastAPI server: {response.status_code}"}
 
-            return Response({"message": "Image uploaded and analyzed successfully", "category": result.get('category'), "before_image_url": before_image_url}, status=status.HTTP_201_CREATED)
+            return Response({"message": "Image uploaded and analyzed successfully", "category": result.get('category'), "material": result.get('material'), "color": result.get('color'), "before_image_url": before_image_url}, status=status.HTTP_201_CREATED)
         else:
             return Response({"error": "Invalid form data"}, status=status.HTTP_400_BAD_REQUEST)
 
