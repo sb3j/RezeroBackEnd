@@ -214,6 +214,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # 브라우저가 닫힐 때 세션 만
 from decouple import config
 OPENAI_API_KEY = config('OPENAI_API_KEY')
 
+from corsheaders.defaults import default_headers
  
 CORS_ORIGIN_WHITELIST = [
 
@@ -223,4 +224,11 @@ CORS_ORIGIN_WHITELIST = [
  
  
 CORS_EXPOSE_HEADERS = ['Authorization', 'Refresh-Token']
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    'refresh-token',
+    'withCredentials'
+]
+ 
+CORS_ALLOW_CREDENTIALS = True
  
