@@ -4,7 +4,7 @@ from .models import CustomUser
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.password_validation import validate_password
 
-
+#개인회원 가입
 class IndividualUserCreationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[password_validation.validate_password])
     verifyPW = serializers.CharField(write_only=True, required=True)
@@ -39,6 +39,7 @@ class IndividualUserCreationSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+#기업 회원가입
 class BusinessUserCreationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[password_validation.validate_password])
     verifyPW = serializers.CharField(write_only=True, required=True)
@@ -78,6 +79,7 @@ class BusinessUserCreationSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+#개인회원 로그인
 class IndividualUserLoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
@@ -110,6 +112,7 @@ class IndividualUserLoginSerializer(serializers.Serializer):
             'access': str(refresh.access_token),
         }
 
+#개인회원 정보조회
 class UserProfileSerializer(serializers.ModelSerializer):
     orders_count = serializers.IntegerField(read_only=True)
 
@@ -123,6 +126,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             'profile_picture': {'required': False, 'allow_null': True}
         }
 
+#기업회원 정보조회
 class BusinessUserProfileSerializer(serializers.ModelSerializer):
     order_requests_count = serializers.IntegerField(read_only=True)
 
@@ -135,6 +139,7 @@ class BusinessUserProfileSerializer(serializers.ModelSerializer):
             'profile_picture': {'required': False, 'allow_null': True}
         }
 
+#기업회원 로그인
 class BusinessUserLoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
@@ -167,6 +172,7 @@ class BusinessUserLoginSerializer(serializers.Serializer):
             'access': str(refresh.access_token),
         }
 
+#사용자 탈퇴
 class UserDeleteSerializer(serializers.Serializer):
     agree_terms = serializers.BooleanField(write_only=True)
     reason = serializers.CharField(write_only=True, required=False, allow_blank=True)
@@ -176,6 +182,7 @@ class UserDeleteSerializer(serializers.Serializer):
             raise serializers.ValidationError("탈퇴 동의는 필수입니다.")
         return value
 
+#비밀번호 변경
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True, validators=[validate_password])
@@ -194,13 +201,15 @@ class ChangePasswordSerializer(serializers.Serializer):
         return data
     
     
-
+#사용자 아이디 중복체크
 class UsernameCheckSerializer(serializers.Serializer):
     username = serializers.CharField()
 
+#닉네임 중복체크
 class NicknameCheckSerializer(serializers.Serializer):
     nickname = serializers.CharField()
 
+#기업이름 중복체크
 class CompanyNameCheckSerializer(serializers.Serializer):
     company_name = serializers.CharField()
     
@@ -209,7 +218,7 @@ class CompanyNameCheckSerializer(serializers.Serializer):
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
 from django.contrib.auth import authenticate
-
+#토큰 재발급
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         credentials = {
@@ -236,7 +245,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 from rest_framework_simplejwt.serializers import TokenRefreshSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-
+#리프레쉬 토큰 재발급
 class CustomTokenRefreshSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
