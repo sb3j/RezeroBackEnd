@@ -55,7 +55,7 @@ class UploadImageView(generics.CreateAPIView):
                         request.session['result'] = result
                         request.session['image_url'] = before_image_url
                         request.session['image_id'] = image_instance.id
-
+                        print(request.session.get('image_id'))
                         image_instance.material = result.get('material', '')
                         image_instance.category = result.get('category', '')
                         image_instance.color = result.get('color', '')
@@ -110,6 +110,7 @@ class RequestDesignView(generics.CreateAPIView):
         design_form = DesignForm(request.POST)
 
         if design_form.is_valid():
+            print(request.session.get('image_id'))
             design_data = design_form.cleaned_data
             image_id = request.session.get('image_id')
             if not image_id:
