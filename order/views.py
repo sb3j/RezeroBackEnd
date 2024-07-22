@@ -68,7 +68,21 @@ class OrderRequestListView(generics.ListAPIView):
         user = self.request.user
         if user.user_type != 'business':
             return Order.objects.none()
-        return Order.objects.filter(business_user=user)
+        return Order.objects.filter(business_user=user, status__in=['pending', '대기'])
+# class OrderRequestListView(generics.ListAPIView):
+#     serializer_class = OrderRequestSerializer
+#     permission_classes = [IsAuthenticated]
+#     pagination_class = StandardResultsSetPagination
+#     filter_backends = [filters.OrderingFilter, filters.SearchFilter]
+#     ordering_fields = ['created_at']
+#     ordering = ['-created_at']
+#     search_fields = ['user__nickname', 'id']  
+
+#     def get_queryset(self):
+#         user = self.request.user
+#         if user.user_type != 'business':
+#             return Order.objects.none()
+#         return Order.objects.filter(business_user=user)
 
 
 # 주문 수락뷰
