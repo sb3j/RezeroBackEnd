@@ -21,3 +21,4 @@ python-multipart==0.0.5
 scikit-image==0.24.0
 django-filter==24.2
 drf_yasg==1.20.0  
+pymysql
