@@ -27,7 +27,7 @@ SECRET_KEY = "django-insecure-e0p0^s=l^$^7$#5@tfbdpv__34#l4h#t^=^#+60ghkh-@0a)b9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
  
-ALLOWED_HOSTS = ['127.0.0.1','http://localhost:3000', '43.202.53.232']
+ALLOWED_HOSTS = ['127.0.0.1','http://localhost:3000', '3.35.131.53']
  
  
  
@@ -234,7 +234,7 @@ DATABASES = {
         'NAME': 'rewear',
         'USER': 'admin',
         'PASSWORD': 'rewear123',
-        'HOST': 'rewear-db.cpsqeqw0ir0j.ap-northeast-2.rds.amazonaws.com',  
+        'HOST': 'rewearbackend.cpsqeqw0ir0j.ap-northeast-2.rds.amazonaws.com',  
         'PORT': '3306',
         'OPTIONS':{
             'init_command' : "SET sql_mode='STRICT_TRANS_TABLES'"
