@@ -41,7 +41,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
  
  
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  
+    "http://localhost:3000", 
+    "http://3.35.88.165:3000",
 ]
 # Application definition
  
@@ -77,8 +78,8 @@ REST_FRAMEWORK = {
  
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=3),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
     'UPDATE_LAST_LOGIN': False,
@@ -220,11 +221,26 @@ CSRF_TRUSTED_ORIGINS = [
 ]
  
  
-CORS_EXPOSE_HEADERS = ['Authorization', 'Refresh-Token']
-
 CORS_ALLOW_HEADERS = list(default_headers) + [
+    'Authorization',
+    'Content-Type',
+    'X-CSRFToken',
     'refresh-token',
     'withCredentials'
+]
+
+CORS_EXPOSE_HEADERS = [
+    'Authorization',
+    'Refresh-Token'
+]
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
 ]
  
 CORS_ALLOW_CREDENTIALS = True
