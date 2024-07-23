@@ -31,6 +31,7 @@ class CreateOrderView(generics.CreateAPIView):
     serializer_class = OrderSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+
 # 주문 거절 뷰
 @swagger_auto_schema(
     operation_description="Reject an order",
@@ -38,6 +39,7 @@ class CreateOrderView(generics.CreateAPIView):
 )
 class RejectOrderView(generics.UpdateAPIView):
     queryset = Order.objects.all()
+    serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
     def update(self, request, *args, **kwargs):
@@ -62,27 +64,13 @@ class OrderRequestListView(generics.ListAPIView):
     filter_backends = [filters.OrderingFilter, filters.SearchFilter]
     ordering_fields = ['created_at']
     ordering = ['-created_at']
-    search_fields = ['user__nickname', 'id']  
+    search_fields = ['user__nickname', 'id']
 
     def get_queryset(self):
         user = self.request.user
         if user.user_type != 'business':
             return Order.objects.none()
         return Order.objects.filter(business_user=user, status__in=['pending', '대기'])
-# class OrderRequestListView(generics.ListAPIView):
-#     serializer_class = OrderRequestSerializer
-#     permission_classes = [IsAuthenticated]
-#     pagination_class = StandardResultsSetPagination
-#     filter_backends = [filters.OrderingFilter, filters.SearchFilter]
-#     ordering_fields = ['created_at']
-#     ordering = ['-created_at']
-#     search_fields = ['user__nickname', 'id']  
-
-#     def get_queryset(self):
-#         user = self.request.user
-#         if user.user_type != 'business':
-#             return Order.objects.none()
-#         return Order.objects.filter(business_user=user)
 
 
 # 주문 수락뷰
@@ -92,6 +80,7 @@ class OrderRequestListView(generics.ListAPIView):
 )
 class AcceptOrderView(generics.UpdateAPIView):
     queryset = Order.objects.all()
+    serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
     def update(self, request, *args, **kwargs):
@@ -109,7 +98,7 @@ class AcceptOrderView(generics.UpdateAPIView):
             )
             if created:
                 fix.save()
-                order.status = '수락'  # 수락 상태로 변경
+                order.status = '수락'
                 order.save()
                 return Response({"detail": "Order accepted."}, status=status.HTTP_200_OK)
             else:
@@ -118,6 +107,7 @@ class AcceptOrderView(generics.UpdateAPIView):
             return Response({"detail": "Order not found or you do not have permission to accept this order."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 # 수락주문리스트뷰
 @swagger_auto_schema(
@@ -131,13 +121,14 @@ class AcceptedOrderListView(generics.ListAPIView):
     filter_backends = [filters.OrderingFilter, filters.SearchFilter]
     ordering_fields = ['created_at', 'fixed_at']
     ordering = ['-created_at']
-    search_fields = ['id', 'user_nickname'] 
+    search_fields = ['id', 'user_nickname']
 
     def get_queryset(self):
         user = self.request.user
         if user.user_type != 'business':
             return Fix.objects.none()
         return Fix.objects.filter(business_user=user)
+
 
 # 기업이름 조회뷰
 @swagger_auto_schema(
@@ -151,6 +142,7 @@ class CompanyNamesView(APIView):
         business_users = CustomUser.objects.filter(user_type='business')
         company_names = business_users.values_list('company_name', flat=True)
         return Response(list(company_names), status=status.HTTP_200_OK)
+
 
 # 사용자의 주문내역뷰
 @swagger_auto_schema(
@@ -168,6 +160,7 @@ class UserOrderListView(generics.ListAPIView):
     def get_queryset(self):
         return Order.objects.filter(user=self.request.user)
 
+
 # 사용자 주문 상세뷰
 @swagger_auto_schema(
     operation_description="Retrieve details of a specific order for a user",
@@ -179,5 +172,3 @@ class UserOrderDetailView(generics.RetrieveAPIView):
 
     def get_queryset(self):
         return Order.objects.filter(user=self.request.user)
-
-
