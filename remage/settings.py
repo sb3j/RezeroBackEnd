@@ -199,9 +199,14 @@ LOGGING = {
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # 세션을 데이터베이스에 저장
 SESSION_COOKIE_NAME = 'sessionid'  # 기본 세션 쿠키 이름
 SESSION_COOKIE_SECURE = False  # True로 설정하면 HTTPS에서만 세션 쿠키 전송
-SESSION_COOKIE_HTTPONLY = True  # 클라이언트 측에서 세션 쿠키를 접근할 수 없도록 설정
+SESSION_COOKIE_HTTPONLY = False # 클라이언트 측에서 세션 쿠키를 접근할 수 있음
 SESSION_SAVE_EVERY_REQUEST = True  # 모든 요청에 대해 세션을 저장
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # 브라우저가 닫힐 때 세션 만료
+# SESSION_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SECURE = False
+
+
+
  
 from decouple import config
 OPENAI_API_KEY = config('OPENAI_API_KEY')
@@ -227,11 +232,12 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     'X-CSRFToken',
     'refresh-token',
     'withCredentials'
+    'sessionid',
 ]
 
 CORS_EXPOSE_HEADERS = [
     'Authorization',
-    'Refresh-Token'
+    'Refresh-Token',
 ]
 
 CORS_ALLOW_METHODS = [
