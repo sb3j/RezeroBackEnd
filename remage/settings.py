@@ -213,6 +213,11 @@ CORS_ORIGIN_WHITELIST = [
     'http://3.35.88.165:3000',
 
 ]
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',  # React 개발 서버
+    'http://3.35.88.165:3000',  # 배포된 React 서버
+]
  
  
 CORS_EXPOSE_HEADERS = ['Authorization', 'Refresh-Token']
