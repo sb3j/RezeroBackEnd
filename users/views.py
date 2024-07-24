@@ -205,10 +205,18 @@ class UserDeleteView(generics.GenericAPIView):
 
         return Response({"message": "사용자가 성공적으로 삭제되었습니다."}, status=status.HTTP_204_NO_CONTENT)
 
-# 비밀번호 변경 뷰
+
+from django.contrib.auth import get_user_model 
+from .serializers import ChangePasswordSerializer  # ChangePasswordSerializer가 정의된 모듈에서 import
+
+CustomUser = get_user_model()
+
 class ChangePasswordView(generics.UpdateAPIView):
     serializer_class = ChangePasswordSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
 
     @swagger_auto_schema(
         operation_description="비밀번호 변경",
@@ -222,7 +230,6 @@ class ChangePasswordView(generics.UpdateAPIView):
             user.save()
             return Response({"message": "비밀번호가 성공적으로 변경되었습니다."}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 # 사용자 아이디 중복체크 뷰
 class UsernameCheckView(views.APIView):
     permission_classes = [AllowAny]
