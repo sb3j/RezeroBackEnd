@@ -28,7 +28,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
  
-ALLOWED_HOSTS = ['127.0.0.1','http://localhost:3000', '3.38.135.110', '3.35.88.165' ]
+ALLOWED_HOSTS = ['127.0.0.1','http://localhost:3000', '3.38.135.110', '3.35.88.165', 'rewear.world' ]
  
  
  
