@@ -28,7 +28,8 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
  
-ALLOWED_HOSTS = ['127.0.0.1','http://localhost:3000', '3.38.135.110', '3.35.88.165', 'rewear.world' ]
+ALLOWED_HOSTS = ['127.0.0.1', 'rewear.world', 'www.rewear.world', '3.38.135.110', '3.35.88.165']
+
  
  
  
@@ -39,11 +40,23 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
  
- 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000", 
-    "http://3.35.88.165:3000",
+    "http://localhost:3000",
+    "http://rewear.world",
+    "http://www.rewear.world",
+    "http://3.35.88.165"
 ]
+
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',  # React 개발 서버
+    'http://rewear.world',
+    'http://www.rewear.world',
+    "http://3.35.88.165"
+]
+
+
+
 # Application definition
  
 INSTALLED_APPS = [
@@ -217,14 +230,10 @@ CORS_ORIGIN_WHITELIST = [
 
     'http://localhost:3000',  # React 개발 서버
     'http://3.35.88.165:3000',
+    "http://rewear.world"
 
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    'http://localhost:3000',  # React 개발 서버
-    'http://3.35.88.165:3000',  # 배포된 React 서버
-]
- 
  
 CORS_ALLOW_HEADERS = list(default_headers) + [
     'Authorization',
